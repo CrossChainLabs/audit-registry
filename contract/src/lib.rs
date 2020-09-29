@@ -11,50 +11,108 @@
  *
  */
 
-// To conserve gas, efficient serialization is achieved through Borsh (http://borsh.io/)
-use near_sdk::borsh::{self, BorshDeserialize, BorshSerialize};
-use near_sdk::wee_alloc;
-use near_sdk::{env, near_bindgen};
-use std::collections::HashMap;
+use near_sdk::json_types::Base58PublicKey;
+use near_sdk::{env, near_bindgen, wee_alloc, AccountId, Balance, Promise, BlockHeight};
+use near_sdk::collections::UnorderedMap;
+use borsh::{BorshDeserialize, BorshSerialize};
+use std::str;
+
+use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hasher}; 
 
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
-// Structs in Rust are similar to other languages, and may include impl keyword as shown below
-// Note: the names of the structs are not important when calling the smart contract, but the function names are
+pub type Hash = String;
+pub type Signature = String;
+
+#[near_bindgen]
+#[derive(Default, BorshDeserialize, BorshSerialize)]
+pub struct Auditor {
+    account_id: AccountId,
+    metadata: Hash, // auditor's metadata
+    certificates: UnorderedMap<Hash, Certificate> //code_hash is the primary key
+}
+/*
+impl Clone for Auditor {
+    fn clone(&self) -> Auditor {
+        return new Auditor(String::from(""),"", null);
+    }
+}*/
+
+#[near_bindgen]
+#[derive(Default, BorshDeserialize, BorshSerialize)]
+pub struct Certificate {
+    signature: Signature,
+    standards: Vec<String>,
+    advisory_hash: Hash,
+    audit_hash: Hash,
+    //code_hash: String
+}
+
+#[near_bindgen]
+#[derive(Default, BorshDeserialize, BorshSerialize)]
+pub struct Project {
+    name: String,
+    url: String,
+    metadata: Hash, // project's metadata
+    code_hash: Hash
+}
+
 #[near_bindgen]
 #[derive(Default, BorshDeserialize, BorshSerialize)]
 pub struct AuditRegistry {
-    records: HashMap<String, String>,
+    auditors: Vec<Auditor>,
+    projects: UnorderedMap<Hash, Project> // code_hash is the key
 }
 
 #[near_bindgen]
 impl AuditRegistry {
     /// Register as auditor, linking account_id and metadata that is IPFS/Sia content hash.
-    fn register_auditor(account_id: AccountId, metadata: Hash);
+    fn register_auditor(account_id: AccountId, metadata: Hash) -> bool {
+        return true;
+    }
   
     /// Adding project to the registry. Code hash is used as primary key for certificate information.
     /// All the other information is used for visualization.
     /// Github url can be used to distinguish projects with the same name in UI. 
-    fn register_project(name: String, url: String, metadata: Hash, code_hash: Hash);
+    fn register_project(name: String, url: String, metadata: Hash, code_hash: Hash) -> bool {
+        return true;
+    }
   
-    //// Auditor signs given code hash, with their audit_hash and a list of standards this contracts satisfies.
+    /// Auditor signs given code hash, with their audit_hash and a list of standards this contracts satisfies.
     /// List of standards represent which standards given source code satisfies. It's free form but should be social consensus for specific domains. E.g. in blockchains these will be EIP-* or NEP-*.
-    fn sign_audit(code_hash: Hash, audit_hash: Hash, standards: Vec<String>, signature: Signature);
+    fn sign_audit(code_hash: Hash, audit_hash: Hash, standards: Vec<String>, signature: Signature) -> bool {
+        return true;
+    }
   
     /// Report advisory for given code hash. Advisory hash is IPFS/Sia content hash.
     /// Only allowed to be done by one of auditors that signed on the given code hash.
     /// It's possible to report advisory first, without posting details to inform users about possible issue and later reveal the details in the disclosure.
-    fn report_advisory(code_hash: Hash, advisory_hash: Hash);
+    fn report_advisory(code_hash: Hash, advisory_hash: Hash) -> bool {
+        return true;
+    }
   
     /// List all auditors.
-    fn get_auditor_list() -> Vec<Auditor>;
+    fn get_auditors_list(&mut self) -> Vec<Auditor> {
+        //let mut auditors = self.auditors.clone(); //&self.auditors;
+        //return auditors.to_vec(&self);
+        return self.auditors;
+    }
   
     /// List all projects.
-    fn get_projects_list() -> Vec<Project>;
+    fn get_projects_list(&mut self) -> Vec<Project> {
+        let projects: Vec<Project> = Vec::new();
+        // TODO: populate with projects
+        return projects;
+    }
    
     /// List certificates for given project.
-    fn get_project_certifcates(code_hash: Hash) -> Vec<Certificate>;
+    fn get_project_certifcates(&mut self, code_hash: Hash) -> Vec<Certificate> {
+        let certificates: Vec<Certificate> = Vec::new();
+        // TODO: populate with projects
+        return certificates;
+    }
   }
   
 
