@@ -11,14 +11,10 @@
  *
  */
 
-use near_sdk::json_types::Base58PublicKey;
-use near_sdk::{env, near_bindgen, wee_alloc, AccountId, Balance, Promise, BlockHeight};
+use near_sdk::{env, near_bindgen, wee_alloc, AccountId};
 use near_sdk::collections::UnorderedMap;
+use near_sdk::collections::Vector;
 use borsh::{BorshDeserialize, BorshSerialize};
-use std::str;
-
-use std::collections::hash_map::DefaultHasher;
-use std::hash::{Hasher}; 
 
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
@@ -26,63 +22,84 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 pub type Hash = String;
 pub type Signature = String;
 
-#[near_bindgen]
 #[derive(Default, BorshDeserialize, BorshSerialize)]
 pub struct Auditor {
-    account_id: AccountId,
     metadata: Hash, // auditor's metadata
     certificates: UnorderedMap<Hash, Certificate> //code_hash is the primary key
 }
-/*
-impl Clone for Auditor {
-    fn clone(&self) -> Auditor {
-        return new Auditor(String::from(""),"", null);
-    }
-}*/
 
-#[near_bindgen]
 #[derive(Default, BorshDeserialize, BorshSerialize)]
 pub struct Certificate {
     signature: Signature,
-    standards: Vec<String>,
+    standards: Vector<String>,
     advisory_hash: Hash,
-    audit_hash: Hash,
-    //code_hash: String
+    audit_hash: Hash
 }
 
-#[near_bindgen]
 #[derive(Default, BorshDeserialize, BorshSerialize)]
 pub struct Project {
     name: String,
     url: String,
     metadata: Hash, // project's metadata
-    code_hash: Hash
 }
 
 #[near_bindgen]
 #[derive(Default, BorshDeserialize, BorshSerialize)]
 pub struct AuditRegistry {
-    auditors: Vec<Auditor>,
-    projects: UnorderedMap<Hash, Project> // code_hash is the key
+    auditors: UnorderedMap<AccountId, Auditor>,
+    projects: UnorderedMap<Hash, Project>
 }
 
-#[near_bindgen]
 impl AuditRegistry {
+    pub fn new() -> Self {
+        Self {
+            auditors: UnorderedMap::new(b"a".to_vec()),
+            projects: UnorderedMap::new(b"b".to_vec())
+        }
+    }
+
     /// Register as auditor, linking account_id and metadata that is IPFS/Sia content hash.
-    fn register_auditor(account_id: AccountId, metadata: Hash) -> bool {
-        return true;
+    fn register_auditor(&mut self, account_id: AccountId, metadata: Hash) -> bool {
+        let new_auditor = Auditor {
+            metadata,
+            certificates: UnorderedMap::new(b"r".to_vec())
+        };
+
+        /* // check that the logged in account_id is the same with the provided one
+        let current_account_id = env::predeccessor_account_id();
+        if account_id.ne(&current_account_id) {
+            return false;
+        }
+        */
+
+        // insert auditor to auditors map
+        let result = self.auditors.insert(&account_id, &new_auditor);
+        match result {
+            Some(_value_exists) => return false,
+            None => return true
+        }
     }
   
     /// Adding project to the registry. Code hash is used as primary key for certificate information.
     /// All the other information is used for visualization.
     /// Github url can be used to distinguish projects with the same name in UI. 
-    fn register_project(name: String, url: String, metadata: Hash, code_hash: Hash) -> bool {
-        return true;
+    fn register_project(&mut self, name: String, url: String, metadata: Hash, code_hash: Hash) -> bool {
+        let new_project = Project {
+            name,
+            url,
+            metadata
+        };
+
+        let result = self.projects.insert(&code_hash, &new_project);
+        match result {
+            Some(_value_exists) => return false,
+            None => return true
+        }
     }
   
     /// Auditor signs given code hash, with their audit_hash and a list of standards this contracts satisfies.
     /// List of standards represent which standards given source code satisfies. It's free form but should be social consensus for specific domains. E.g. in blockchains these will be EIP-* or NEP-*.
-    fn sign_audit(code_hash: Hash, audit_hash: Hash, standards: Vec<String>, signature: Signature) -> bool {
+    fn sign_audit(code_hash: Hash, audit_hash: Hash, standards: Vector<String>, signature: Signature) -> bool {
         return true;
     }
   
@@ -94,23 +111,35 @@ impl AuditRegistry {
     }
   
     /// List all auditors.
-    fn get_auditors_list(&mut self) -> Vec<Auditor> {
-        //let mut auditors = self.auditors.clone(); //&self.auditors;
-        //return auditors.to_vec(&self);
-        return self.auditors;
+    fn get_auditors_list(self) -> Vec<Auditor> {
+        let auditors = self.auditors.values_as_vector().to_vec();
+        return auditors;
     }
   
     /// List all projects.
-    fn get_projects_list(&mut self) -> Vec<Project> {
-        let projects: Vec<Project> = Vec::new();
-        // TODO: populate with projects
+    fn get_projects_list(self) -> Vec<Project> {
+        let projects = self.projects.values_as_vector().to_vec();
         return projects;
     }
    
     /// List certificates for given project.
-    fn get_project_certifcates(&mut self, code_hash: Hash) -> Vec<Certificate> {
-        let certificates: Vec<Certificate> = Vec::new();
-        // TODO: populate with projects
+    fn get_project_certificates(&mut self, code_hash: Hash) -> Vec<Certificate> {
+        // list auditors and get certificates for the given code_hash
+        let mut certificates: Vec<Certificate> = Vec::new();
+        let auditors = self.auditors.values_as_vector().to_vec();
+        for auditor in &auditors {
+            let signature= "".to_string();
+            let standards = Vector::default();
+            let advisory_hash = "".to_string();
+            let audit_hash = "".to_string();
+            let empty_certificate = Certificate{ signature, standards, advisory_hash, audit_hash };
+            let certificate = auditor.certificates.get(&code_hash).unwrap_or(empty_certificate);
+
+            if certificate.signature != "" && certificate.advisory_hash != "" && certificate.audit_hash != "" {
+                certificates.push(certificate);
+            }
+        }
+
         return certificates;
     }
   }
@@ -127,9 +156,10 @@ impl AuditRegistry {
  * yarn test
  *
  */
+#[cfg(not(target_arch = "wasm32"))]
 #[cfg(test)]
 mod tests {
-    use super::*;
+    //use super::*;
     use near_sdk::MockedBlockchain;
     use near_sdk::{testing_env, VMContext};
 
@@ -154,7 +184,7 @@ mod tests {
             epoch_height: 19,
         }
     }
-
+/*
     #[test]
     fn set_then_get_greeting() {
         let context = get_context(vec![], false);
@@ -178,4 +208,5 @@ mod tests {
             contract.get_greeting("francis.near".to_string())
         );
     }
+    */
 }
