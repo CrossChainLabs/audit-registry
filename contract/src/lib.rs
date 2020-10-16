@@ -65,12 +65,11 @@ impl AuditRegistry {
             certificates: UnorderedMap::new(b"r".to_vec())
         };
 
-        /* // check that the logged in account_id is the same with the provided one
-        let current_account_id = env::predeccessor_account_id();
+        // check that the logged in account_id is the same with the provided one
+        let current_account_id = env::predecessor_account_id();
         if account_id.ne(&current_account_id) {
             return false;
         }
-        */
 
         // insert auditor to auditors map
         let result = self.auditors.insert(&account_id, &new_auditor);
@@ -99,14 +98,66 @@ impl AuditRegistry {
   
     /// Auditor signs given code hash, with their audit_hash and a list of standards this contracts satisfies.
     /// List of standards represent which standards given source code satisfies. It's free form but should be social consensus for specific domains. E.g. in blockchains these will be EIP-* or NEP-*.
-    fn sign_audit(code_hash: Hash, audit_hash: Hash, standards: Vector<String>, signature: Signature) -> bool {
-        return true;
+    fn sign_audit(self, code_hash: Hash, audit_hash: Hash, standards: Vector<String>, signature: Signature) -> bool {
+        // get current account_id
+        let current_account_id = env::predecessor_account_id();
+
+        let mut code_hash_prefix = code_hash.as_bytes().to_vec();
+        code_hash_prefix.extend_from_slice(b":b");
+        let certificates: UnorderedMap<Hash, Certificate> = UnorderedMap::new(code_hash_prefix);
+
+        let metadata = "".to_string();
+        let empty_auditor = Auditor{ metadata, certificates };
+        let mut auditor = self.auditors.get(&current_account_id).unwrap_or(empty_auditor);
+
+        if auditor.metadata == "" {
+            return false;
+        }
+
+        let advisory_hash = "".to_string();
+        let certificate = Certificate{ signature, standards, advisory_hash, audit_hash };
+
+        let result = auditor.certificates.insert(&code_hash, &certificate);
+        match result {
+            Some(_value_exists) => return false,
+            None => return true
+        }
     }
   
     /// Report advisory for given code hash. Advisory hash is IPFS/Sia content hash.
     /// Only allowed to be done by one of auditors that signed on the given code hash.
     /// It's possible to report advisory first, without posting details to inform users about possible issue and later reveal the details in the disclosure.
-    fn report_advisory(code_hash: Hash, advisory_hash: Hash) -> bool {
+    fn report_advisory(self, code_hash: Hash, advisory_hash: Hash) -> bool {
+        // create a new certificate
+        let mut code_hash_prefix = code_hash.as_bytes().to_vec();
+        code_hash_prefix.extend_from_slice(b":b");
+        let certificates: UnorderedMap<Hash, Certificate> = UnorderedMap::new(code_hash_prefix);
+
+        // get the auditor the corresponds to the current account_id
+        let current_account_id = env::predecessor_account_id();
+        let metadata = "".to_string();
+        let empty_auditor = Auditor{ metadata, certificates };
+        let auditor = self.auditors.get(&current_account_id).unwrap_or(empty_auditor);
+        if auditor.metadata == "" {
+            return false;
+        }
+
+        // save a temporary advisory_hash
+        let advisory_temp = advisory_hash.clone();
+
+        // get the certificate that requires the advisory_hash
+        let signature = "".to_string();
+        let standards = Vector::default();
+        let advisory_hash: = "".to_string();
+        let audit_hash = "".to_string();
+        let empty_certificate = Certificate{ signature, standards, advisory_hash, audit_hash };
+        let mut certificate = auditor.certificates.get(&code_hash).unwrap_or(empty_certificate);
+        if certificate.signature == "" || certificate.advisory_hash == "" || certificate.audit_hash == "" {
+            return false;
+        }
+
+        // report advisory
+        certificate.advisory_hash = advisory_temp;
         return true;
     }
   
@@ -128,7 +179,7 @@ impl AuditRegistry {
         let mut certificates: Vec<Certificate> = Vec::new();
         let auditors = self.auditors.values_as_vector().to_vec();
         for auditor in &auditors {
-            let signature= "".to_string();
+            let signature = "".to_string();
             let standards = Vector::default();
             let advisory_hash = "".to_string();
             let audit_hash = "".to_string();
