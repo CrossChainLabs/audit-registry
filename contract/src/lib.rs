@@ -148,7 +148,7 @@ impl AuditRegistry {
         // get the certificate that requires the advisory_hash
         let signature = "".to_string();
         let standards = Vector::default();
-        let advisory_hash: = "".to_string();
+        let advisory_hash = "".to_string();
         let audit_hash = "".to_string();
         let empty_certificate = Certificate{ signature, standards, advisory_hash, audit_hash };
         let mut certificate = auditor.certificates.get(&code_hash).unwrap_or(empty_certificate);
