@@ -1,4 +1,5 @@
-const CONTRACT_NAME = process.env.CONTRACT_NAME ||'audit-registry'
+//const CONTRACT_NAME = process.env.CONTRACT_NAME ||'audit-registry'
+const CONTRACT_NAME='dev-1603742298069-4560357'
 
 function getConfig(env) {
   switch (env) {
