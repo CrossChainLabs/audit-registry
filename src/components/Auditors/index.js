@@ -28,7 +28,19 @@ const auditorsData = [
 ];
 
 export default function Auditors() {
-  const [auditors] = useState(auditorsData);
+  const [auditors, set_auditors] = useState(auditorsData);
+
+  React.useEffect(
+    () => {
+      if (window.walletConnection.isSignedIn()) {
+        window.contract.get_auditors_list()
+          .then(auditorsFromContract => {
+            set_auditors(auditorsFromContract)
+          })
+      }
+    },
+    []
+  )
 
   return (
     <>

@@ -23,7 +23,6 @@ const useStyles = makeStyles((theme) => ({
 
 
 const Auth = (props) => {
-  const [greeting, set_greeting] = React.useState();
   const classes = useStyles();
 
   const onLogout = () => {
@@ -50,18 +49,6 @@ const Auth = (props) => {
 
     setOpen(false);
   };
-
-  React.useEffect(
-    () => {
-      if (window.walletConnection.isSignedIn()) {
-        window.contract.get_greeting({ account_id: window.accountId })
-          .then(greetingFromContract => {
-            set_greeting(greetingFromContract)
-          })
-      }
-    },
-    []
-  )
 
   return (
     <>

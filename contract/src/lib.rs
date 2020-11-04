@@ -1,20 +1,9 @@
-/*
- * This is an example of a Rust smart contract with two simple, symmetric functions:
- *
- * 1. set_greeting: accepts a greeting, such as "howdy", and records it for the user (account_id)
- *    who sent the request
- * 2. get_greeting: accepts an account_id and returns the greeting saved for it, defaulting to
- *    "Hello"
- *
- * Learn more about writing NEAR smart contracts with Rust:
- * https://github.com/near/near-sdk-rs
- *
- */
+use borsh::{BorshDeserialize, BorshSerialize};
 
 use near_sdk::{env, near_bindgen, wee_alloc, AccountId};
 use near_sdk::collections::UnorderedMap;
 use near_sdk::collections::Vector;
-use borsh::{BorshDeserialize, BorshSerialize};
+
 
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
@@ -50,16 +39,18 @@ pub struct AuditRegistry {
     projects: UnorderedMap<Hash, Project>
 }
 
+//#[near_bindgen(init => new)]
+#[near_bindgen]
 impl AuditRegistry {
-    pub fn new() -> Self {
+    /*pub fn new() -> Self {
         Self {
-            auditors: UnorderedMap::new(b"a".to_vec()),
+            auditors: UnorderedMap::new(b"a".to_vec(),
             projects: UnorderedMap::new(b"b".to_vec())
         }
-    }
+    }*/
 
-    /// Register as auditor, linking account_id and metadata that is IPFS/Sia content hash.
-    fn register_auditor(&mut self, account_id: AccountId, metadata: Hash) -> bool {
+    // Register as auditor, linking account_id and metadata that is IPFS/Sia content hash.
+    pub fn register_auditor(&mut self, account_id: AccountId, metadata: Hash) -> bool {
         let new_auditor = Auditor {
             metadata,
             certificates: UnorderedMap::new(b"r".to_vec())
@@ -82,7 +73,7 @@ impl AuditRegistry {
     /// Adding project to the registry. Code hash is used as primary key for certificate information.
     /// All the other information is used for visualization.
     /// Github url can be used to distinguish projects with the same name in UI. 
-    fn register_project(&mut self, name: String, url: String, metadata: Hash, code_hash: Hash) -> bool {
+    pub fn register_project(&mut self, name: String, url: String, metadata: Hash, code_hash: Hash) -> bool {
         let new_project = Project {
             name,
             url,
@@ -96,9 +87,9 @@ impl AuditRegistry {
         }
     }
   
-    /// Auditor signs given code hash, with their audit_hash and a list of standards this contracts satisfies.
+    /*/// Auditor signs given code hash, with their audit_hash and a list of standards this contracts satisfies.
     /// List of standards represent which standards given source code satisfies. It's free form but should be social consensus for specific domains. E.g. in blockchains these will be EIP-* or NEP-*.
-    fn sign_audit(self, code_hash: Hash, audit_hash: Hash, standards: Vector<String>, signature: Signature) -> bool {
+    pub fn sign_audit(self, code_hash: Hash, audit_hash: Hash, standards: Vector<String>, signature: Signature) -> bool {
         // get current account_id
         let current_account_id = env::predecessor_account_id();
 
@@ -122,12 +113,12 @@ impl AuditRegistry {
             Some(_value_exists) => return false,
             None => return true
         }
-    }
+    }*/
   
     /// Report advisory for given code hash. Advisory hash is IPFS/Sia content hash.
     /// Only allowed to be done by one of auditors that signed on the given code hash.
     /// It's possible to report advisory first, without posting details to inform users about possible issue and later reveal the details in the disclosure.
-    fn report_advisory(self, code_hash: Hash, advisory_hash: Hash) -> bool {
+    pub fn report_advisory(self, code_hash: Hash, advisory_hash: Hash) -> bool {
         // create a new certificate
         let mut code_hash_prefix = code_hash.as_bytes().to_vec();
         code_hash_prefix.extend_from_slice(b":b");
@@ -161,20 +152,20 @@ impl AuditRegistry {
         return true;
     }
   
-    /// List all auditors.
-    fn get_auditors_list(self) -> Vec<Auditor> {
+    /*/// List all auditors.
+    pub fn get_auditors_list(self) -> Vec<Auditor> {
         let auditors = self.auditors.values_as_vector().to_vec();
         return auditors;
     }
   
     /// List all projects.
-    fn get_projects_list(self) -> Vec<Project> {
+    pub fn get_projects_list(self) -> Vec<Project> {
         let projects = self.projects.values_as_vector().to_vec();
         return projects;
     }
    
     /// List certificates for given project.
-    fn get_project_certificates(&mut self, code_hash: Hash) -> Vec<Certificate> {
+    pub fn get_project_certificates(&mut self, code_hash: Hash) -> Vec<Certificate> {
         // list auditors and get certificates for the given code_hash
         let mut certificates: Vec<Certificate> = Vec::new();
         let auditors = self.auditors.values_as_vector().to_vec();
@@ -192,7 +183,7 @@ impl AuditRegistry {
         }
 
         return certificates;
-    }
+    }*/
   }
   
 
