@@ -2,6 +2,7 @@ import React from 'react';
 
 import { Grid, Button, TextField, Paper } from '@material-ui/core';
 
+//code_hash:, audit_hash:, standards: Vector<String>, signature:
 export default function RegisterAuditor() {
   return (
     <>
@@ -19,41 +20,41 @@ export default function RegisterAuditor() {
                 <div className="text-black mt-3">
                   <span className="text-center">
                     <h1 className="display-4 mb-1 font-weight-bold">
-                      Add Project
+                      Sign Audit
                               </h1>
                   </span>
                   <div>
                     <div className="mb-3">
                       <label className="font-weight-bold mb-2">
-                        Name
+                        Code Hash
                                 </label>
                       <TextField
                         variant="outlined"
                         size="small"
                         fullWidth
-                        placeholder="project name"
+                        placeholder="code hash"
                       />
                     </div>
                     <div className="mb-3">
                       <label className="font-weight-bold mb-2">
-                        URL
+                        Audit Hash
                                 </label>
                       <TextField
                         variant="outlined"
                         size="small"
                         fullWidth
-                        placeholder="project url"
+                        placeholder="audit hash"
                       />
                     </div>
                     <div className="mb-3">
                       <label className="font-weight-bold mb-2">
-                        Metadata
+                        Standards
                                 </label>
                       <TextField
                         variant="outlined"
                         size="small"
                         fullWidth
-                        placeholder="project metadata"
+                        placeholder="standards"
                       />
                     </div>
 

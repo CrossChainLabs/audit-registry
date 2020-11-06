@@ -46,7 +46,7 @@ export default function ReportAdvisory() {
                         variant="outlined"
                         size="small"
                         fullWidth
-                        placeholder="account id"
+                        placeholder="code hash"
                         value={codeHash}
                         onChange={(event) => set_codeHash(event.target.value)}
                       />
@@ -59,7 +59,7 @@ export default function ReportAdvisory() {
                         variant="outlined"
                         size="small"
                         fullWidth
-                        placeholder="metadata"
+                        placeholder="advisory hash"
                         value={advisoryHash}
                         onChange={(event) => set_advisoryHash(event.target.value)}
                       />
