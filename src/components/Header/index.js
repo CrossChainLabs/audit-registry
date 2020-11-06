@@ -43,6 +43,10 @@ export default function Header() {
       setValue(1);
     } else if (window.location.pathname === "/audit-registry/PageRegisterAuditor" && value !== 2) {
       setValue(2);
+    } else if (window.location.pathname === "/audit-registry/PageReportAdvisory" && value !== 3) {
+      setValue(3);
+    } else if (window.location.pathname === "/audit-registry/PageSignAudit" && value !== 4) {
+      setValue(4);
     }
   }, [value]);
 
@@ -61,6 +65,8 @@ export default function Header() {
             <Tab className={classes.tab} component={Link} to='/Homepage' label='Home' />
             <Tab className={classes.tab} component={Link} to='/PageRegisterProject' label='Add Project' />
             <Tab className={classes.tab} component={Link} to='/PageRegisterAuditor' label='Become an auditor' />
+            <Tab className={classes.tab} component={Link} to='/PageReportAdvisory' label='Report Advisory' />
+            <Tab className={classes.tab} component={Link} to='/PageSignAudit' label='Sign Audit' />
           </Tabs>
           <div className="divider-v d-none d-lg-block divider-v-md" />
           <Auth />

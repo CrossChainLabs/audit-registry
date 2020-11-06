@@ -5,6 +5,8 @@ import MuiTheme from './theme';
 
 import PageRegisterProject from './pages/PageRegisterProject';
 import PageRegisterAuditor from './pages/PageRegisterAuditor';
+import PageReportAdvisory from './pages/PageReportAdvisory';
+import PageSignAudit from './pages/PageSignAudit';
 import LoginPage from './pages/LoginPage';
 import Homepage from './pages/Homepage';
 
@@ -38,12 +40,16 @@ const Routes = () => {
             path={['/Homepage',
             '/PageRegisterProject',
             '/PageRegisterAuditor',
+            '/PageReportAdvisory',
+            '/PageSignAudit',
             '/Login'
             ]}>
             <Switch location={location} key={location.pathname}>
                 <Route path="/Homepage" component={Homepage} />
                 <Route path="/PageRegisterProject" component={PageRegisterProject}/>
                 <Route path="/PageRegisterAuditor" component={PageRegisterAuditor}/>
+                <Route path="/PageReportAdvisory" component={PageReportAdvisory}/>
+                <Route path="/PageSignAudit" component={PageSignAudit}/>
                 <Route path="/Login" component={LoginPage}/>
             </Switch>
           </Route>
