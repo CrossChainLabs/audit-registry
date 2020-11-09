@@ -10,6 +10,7 @@ target
 out
 .cache
 dist
+.vscode
 
 #keys
 /neardev

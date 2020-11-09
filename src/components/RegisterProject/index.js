@@ -1,8 +1,25 @@
-import React from 'react';
-
+import React, {useState} from 'react';
 import { Grid, Button, TextField, Paper } from '@material-ui/core';
 
-export default function RegisterAuditor() {
+export default function RegisterProject() {
+  const [name, set_name] = useState();
+  const [url, set_url] = useState();
+  const [metadata, set_metadata] = useState();
+  const [codeHash, set_codeHash] = useState();
+
+  const onSubmit = async () => {
+    if (window.walletConnection.isSignedIn()) {
+      window.contract.register_project({ 
+        name: name, 
+        url: url,
+        metadata: metadata,
+        code_hash: codeHash
+      }).then(result => {
+          console.log('onSignAudit: ' + result);
+        })
+    }
+  }
+
   return (
     <>
       <div className="app-wrapper bg-white min-vh-100">
@@ -32,6 +49,8 @@ export default function RegisterAuditor() {
                         size="small"
                         fullWidth
                         placeholder="project name"
+                        value={name}
+                        onChange={(event) => set_name(event.target.value)}
                       />
                     </div>
                     <div className="mb-3">
@@ -43,6 +62,8 @@ export default function RegisterAuditor() {
                         size="small"
                         fullWidth
                         placeholder="project url"
+                        value={url}
+                        onChange={(event) => set_url(event.target.value)}
                       />
                     </div>
                     <div className="mb-3">
@@ -54,14 +75,29 @@ export default function RegisterAuditor() {
                         size="small"
                         fullWidth
                         placeholder="project metadata"
+                        value={metadata}
+                        onChange={(event) => set_metadata(event.target.value)}
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <label className="font-weight-bold mb-2">
+                        Code Hash
+                                </label>
+                      <TextField
+                        variant="outlined"
+                        size="small"
+                        fullWidth
+                        placeholder="code hash"
+                        value={codeHash}
+                        onChange={(event) => set_codeHash(event.target.value)}
                       />
                     </div>
 
-
                     <div className="text-center mb-4">
-                      <Button className="btn-primary text-uppercase font-weight-bold font-size-sm my-3">
+                      <Button className="btn-primary text-uppercase font-weight-bold font-size-sm my-3"
+                              onClick={onSubmit}>
                         Submit
-                              </Button>
+                      </Button>
                     </div>
                   </div>
                 </div>

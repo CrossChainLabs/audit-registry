@@ -1,14 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import { AppBar, Toolbar, Tabs, Tab} from '@material-ui/core';
-import { NavLink } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import { AppBar, Toolbar, Tabs, Tab, Typography } from '@material-ui/core';
+import { NavLink, Link } from 'react-router-dom';
 
 import projectLogo from '../../assets/logo-white.svg';
 import Auth from '../Auth';
 
-
 const useStyles = makeStyles((theme) => ({
+  root: {
+    flexGrow: 1,
+  },
+  flex: {
+    flexGrow: 1,
+  },
   logo: {
     height: '4em'
   },
@@ -16,64 +20,33 @@ const useStyles = makeStyles((theme) => ({
     ...theme.mixins.toolbar,
     marginBottom: '3em'
   },
-  tabContainer: {
-    marginLeft: 'auto',
-  },
-  tab: {
-    color: 'white',
-    textTransform: 'none',
-    fontWeight: 700,
-    fontSize: '1rem'
-  }
 }));
 
 export default function Header() {
   const classes = useStyles();
 
-  const [value, setValue] = useState(0);
-  const handleChange = (e, value) => {
-    setValue(value);
-  }
-
-  useEffect(() => {
-    console.log(window.location.pathname);
-    if (window.location.pathname === "/audit-registry/Homepage" && value !== 0) {
-      setValue(0);
-    } else if (window.location.pathname === "/audit-registry/PageRegisterProject" && value !== 1) {
-      setValue(1);
-    } else if (window.location.pathname === "/audit-registry/PageRegisterAuditor" && value !== 2) {
-      setValue(2);
-    } else if (window.location.pathname === "/audit-registry/PageReportAdvisory" && value !== 3) {
-      setValue(3);
-    } else if (window.location.pathname === "/audit-registry/PageSignAudit" && value !== 4) {
-      setValue(4);
-    }
-  }, [value]);
-
   return (
     <>
+    <div className={classes.root}>
       <AppBar position="fixed">
         <Toolbar disableGutters>
           <NavLink to="/Homepage" title="Audit Registry" className="app-nav-logo">
-            <img
-              alt="Audit Registry"
-              className={classes.logo}
-              src={projectLogo}
-            />
+              <img
+                alt="Audit Registry"
+                className={classes.logo}
+                src={projectLogo}
+              />
           </NavLink>
-          <Tabs value={value} className={classes.tabContainer} onChange={handleChange} indicatorColor="primary">
-            <Tab className={classes.tab} component={Link} to='/Homepage' label='Home' />
-            <Tab className={classes.tab} component={Link} to='/PageRegisterProject' label='Add Project' />
-            <Tab className={classes.tab} component={Link} to='/PageRegisterAuditor' label='Become an auditor' />
-            <Tab className={classes.tab} component={Link} to='/PageReportAdvisory' label='Report Advisory' />
-            <Tab className={classes.tab} component={Link} to='/PageSignAudit' label='Sign Audit' />
-          </Tabs>
-          <div className="divider-v d-none d-lg-block divider-v-md" />
+          <Typography variant="title" color="inherit" className={classes.flex}>
+          <h2 className="mb-1 text-white">
+                Audit Registry
+          </h2>
+          </Typography>
           <Auth />
-          <div className="divider-v d-none d-lg-block divider-v-md" />
         </Toolbar>
       </AppBar>
       <div className={classes.toolbarMargin} />
+      </div>
     </>
   );
 }
