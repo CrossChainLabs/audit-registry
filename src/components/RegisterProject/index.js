@@ -68,19 +68,6 @@ export default function RegisterProject() {
                     </div>
                     <div className="mb-3">
                       <label className="font-weight-bold mb-2">
-                        Metadata
-                                </label>
-                      <TextField
-                        variant="outlined"
-                        size="small"
-                        fullWidth
-                        placeholder="project metadata"
-                        value={metadata}
-                        onChange={(event) => set_metadata(event.target.value)}
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <label className="font-weight-bold mb-2">
                         Code Hash
                                 </label>
                       <TextField
@@ -92,7 +79,21 @@ export default function RegisterProject() {
                         onChange={(event) => set_codeHash(event.target.value)}
                       />
                     </div>
-
+                    <div className="mb-3">
+                      <label className="font-weight-bold mb-2">
+                        Metadata
+                                </label>
+                      <TextField
+                        variant="outlined"
+                        size="small"
+                        fullWidth
+                        multiline
+                        rows={10}
+                        placeholder="project metadata"
+                        value={metadata}
+                        onChange={(event) => set_metadata(event.target.value)}
+                      />
+                    </div>
                     <div className="text-center mb-4">
                       <Button className="btn-primary text-uppercase font-weight-bold font-size-sm my-3"
                               onClick={onSubmit}>

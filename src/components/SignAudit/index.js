@@ -1,8 +1,8 @@
 import React, {useState} from 'react';
 import { Grid, Button, TextField, Paper } from '@material-ui/core';
 
-export default function SignAudit() {
-  const [codeHash, set_codeHash] = useState();
+export default function SignAudit(codehash) {
+  const [codeHash, set_codeHash] = useState(codehash);
   const [auditHash, set_auditHash] = useState();
   const [standards, set_standards] = useState();
   const [signature, set_signature] = useState();
@@ -55,19 +55,6 @@ export default function SignAudit() {
                     </div>
                     <div className="mb-3">
                       <label className="font-weight-bold mb-2">
-                        Audit Hash
-                                </label>
-                      <TextField
-                        variant="outlined"
-                        size="small"
-                        fullWidth
-                        placeholder="audit hash"
-                        value={auditHash}
-                        onChange={(event) => set_auditHash(event.target.value)}
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <label className="font-weight-bold mb-2">
                         Standards
                                 </label>
                       <TextField
@@ -90,6 +77,21 @@ export default function SignAudit() {
                         placeholder="signature"
                         value={signature}
                         onChange={(event) => set_signature(event.target.value)}
+                      />
+                    </div>
+                    <div className="mb-3">
+                      <label className="font-weight-bold mb-2">
+                        Audit
+                                </label>
+                      <TextField
+                        variant="outlined"
+                        size="small"
+                        fullWidth
+                        multiline
+                        rows={10}
+                        placeholder="audit findings"
+                        value={auditHash}
+                        onChange={(event) => set_auditHash(event.target.value)}
                       />
                     </div>
                     <div className="text-center mb-4">

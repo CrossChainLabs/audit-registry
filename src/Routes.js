@@ -42,8 +42,8 @@ const Routes = () => {
             path={['/Homepage',
             '/PageRegisterProject',
             '/PageRegisterAuditor',
-            '/PageReportAdvisory',
-            '/PageSignAudit',
+            '/PageReportAdvisory:codehash',
+            '/PageSignAudit:codehash',
             '/PageProjectHistory',
             '/PageProjectDetails',
             '/Login'
@@ -52,8 +52,8 @@ const Routes = () => {
                 <Route path="/Homepage" component={Homepage} />
                 <Route path="/PageRegisterProject" component={PageRegisterProject}/>
                 <Route path="/PageRegisterAuditor" component={PageRegisterAuditor}/>
-                <Route path="/PageReportAdvisory" component={PageReportAdvisory}/>
-                <Route path="/PageSignAudit" component={PageSignAudit}/>
+                <Route path="/PageReportAdvisory:codehash" component={PageReportAdvisory}/>
+                <Route path="/PageSignAudit:codehash" component={PageSignAudit}/>
                 <Route path="/PageProjectHistory" component={PageProjectHistory}/>
                 <Route path="/PageProjectDetails" component={PageProjectDetails}/>
                 <Route path="/Login" component={LoginPage}/>

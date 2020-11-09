@@ -1,20 +1,16 @@
 import React, {useState} from 'react';
-
 import { Grid, Button, TextField, Paper } from '@material-ui/core';
 
-import getConfig from '../../config'
-const { networkId } = getConfig(process.env.NODE_ENV || 'development')
-
-export default function ReportAdvisory() {
-  const [codeHash, set_codeHash] = useState();
+export default function ReportAdvisory(codehash) {
+  const [codeHash, set_codeHash] = useState(codehash);
   const [advisoryHash, set_advisoryHash] = useState();
   
   const onAdvisoryReport = async () => {
     if (window.walletConnection.isSignedIn()) {
-      window.contract.advisory_report({ code_hash: codeHash, advisory_hash: advisoryHash })
+      window.contract.report_advisory({ code_hash: codeHash, advisory_hash: advisoryHash })
         .then(result => {
-          console.log('onAdvisoryReport: ' + result);
-        })
+          alert('onAdvisoryReport: ' + result);
+        });
     }
   }
 
@@ -53,13 +49,15 @@ export default function ReportAdvisory() {
                     </div>
                     <div className="mb-3">
                       <label className="font-weight-bold mb-2">
-                        Advisory Hash
+                        Advisory
                       </label>
                       <TextField
                         variant="outlined"
                         size="small"
                         fullWidth
-                        placeholder="advisory hash"
+                        multiline
+                        rows={10}
+                        placeholder="advisory report"
                         value={advisoryHash}
                         onChange={(event) => set_advisoryHash(event.target.value)}
                       />

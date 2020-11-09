@@ -1,13 +1,25 @@
 import React, {useState} from 'react';
 import { Grid, Button, TextField, Paper } from '@material-ui/core';
 
+import IPFS from '../../ipfs'
+import Alert_INFO from '../Alert';
+
 export default function RegisterAuditor() {
   const [accountId, set_accountId] = useState();
   const [metadata, set_metadata] = useState();
+  const [cid, set_cid] = useState();
   
   const onRegisterAuditor = async () => {
     if (window.walletConnection.isSignedIn()) {
-      window.contract.register_auditor({ account_id: accountId, metadata: metadata })
+      let metadata_hash = await IPFS.getInstance().Save(metadata);
+      if (!metadata_hash) {
+        //Unable to save metadata on IPFS'
+        return;
+      }
+
+      set_cid(metadata_hash);
+
+      window.contract.register_auditor({ account_id: accountId, metadata: metadata_hash })
         .then(result => {
           console.log('onRegisterAuditor: ' + result);
         })
@@ -18,6 +30,8 @@ export default function RegisterAuditor() {
     <>
       <div className="app-wrapper bg-white min-vh-100">
         <Grid container spacing={3}>
+          {cid ? Alert_INFO('info', 'Metadata saved on IPFS') :
+          Alert_INFO('error', 'Unable to save metadata on IPFS')}
           <Grid item xs>
             <Paper />
           </Grid>
@@ -55,6 +69,8 @@ export default function RegisterAuditor() {
                         variant="outlined"
                         size="small"
                         fullWidth
+                        multiline
+                        rows={10}
                         placeholder="metadata"
                         value={metadata}
                         onChange={(event) => set_metadata(event.target.value)}
