@@ -78,7 +78,7 @@
     "start": "env-cmd -f ./neardev/dev-account.env react-scripts start",
     "build": "npm run build:contract && react-scripts build",
     "build:contract": "node ./contract/build",
-    "build:contract:name" : "sh ./contract_name.sh",
+    "build:contract:name": "sh ./contract_name.sh",
     "build:web": "parcel build src/index.html --public-url ./",
     "dev:deploy:contract": "near dev-deploy",
     "deploy:contract": "near deploy",
