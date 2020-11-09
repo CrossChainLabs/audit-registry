@@ -1,17 +1,13 @@
 import React, {useState} from 'react';
-
 import { Grid, Button, TextField, Paper } from '@material-ui/core';
-
-import getConfig from '../../config'
-const { networkId } = getConfig(process.env.NODE_ENV || 'development')
 
 export default function RegisterAuditor() {
   const [accountId, set_accountId] = useState();
-  const [hash, set_hash] = useState();
+  const [metadata, set_metadata] = useState();
   
   const onRegisterAuditor = async () => {
     if (window.walletConnection.isSignedIn()) {
-      window.contract.register_auditor({  account_id: accountId, metadata: hash })
+      window.contract.register_auditor({  account_id: accountId, metadata: metadata })
         .then(result => {
           console.log('onRegisterAuditor: ' + result);
         })
@@ -60,8 +56,8 @@ export default function RegisterAuditor() {
                         size="small"
                         fullWidth
                         placeholder="metadata"
-                        value={hash}
-                        onChange={(event) => set_hash(event.target.value)}
+                        value={metadata}
+                        onChange={(event) => set_metadata(event.target.value)}
                       />
                     </div>
 

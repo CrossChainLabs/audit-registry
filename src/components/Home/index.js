@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { Grid, Paper } from '@material-ui/core';
+import { Grid, Paper, CircularProgress } from '@material-ui/core';
 
 import Header from '../Header';
 import Auditors from '../Auditors';
@@ -17,7 +17,7 @@ export default function Home() {
       <Grid container>
         <Grid container spacing={6}>
           <Grid item xs>
-            <Paper />
+            <Paper/>
           </Grid>
           <Grid item xl={4}>
             <Auditors />

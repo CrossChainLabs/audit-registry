@@ -1,9 +1,25 @@
-import React from 'react';
-
+import React, {useState} from 'react';
 import { Grid, Button, TextField, Paper } from '@material-ui/core';
 
-//code_hash:, audit_hash:, standards: Vector<String>, signature:
-export default function RegisterAuditor() {
+export default function SignAudit() {
+  const [codeHash, set_codeHash] = useState();
+  const [auditHash, set_auditHash] = useState();
+  const [standards, set_standards] = useState();
+  const [signature, set_signature] = useState();
+
+  const onSign = async () => {
+    if (window.walletConnection.isSignedIn()) {
+      window.contract.sign_audit({ 
+        code_hash: codeHash, 
+        audit_hash: auditHash,
+        standards: standards,
+        signature: signature
+      }).then(result => {
+          console.log('onSignAudit: ' + result);
+        })
+    }
+  }
+
   return (
     <>
       <div className="app-wrapper bg-white min-vh-100">
@@ -33,6 +49,8 @@ export default function RegisterAuditor() {
                         size="small"
                         fullWidth
                         placeholder="code hash"
+                        value={codeHash}
+                        onChange={(event) => set_codeHash(event.target.value)}
                       />
                     </div>
                     <div className="mb-3">
@@ -44,6 +62,8 @@ export default function RegisterAuditor() {
                         size="small"
                         fullWidth
                         placeholder="audit hash"
+                        value={auditHash}
+                        onChange={(event) => set_auditHash(event.target.value)}
                       />
                     </div>
                     <div className="mb-3">
@@ -54,15 +74,29 @@ export default function RegisterAuditor() {
                         variant="outlined"
                         size="small"
                         fullWidth
-                        placeholder="standards"
+                        placeholder="ex: standard1;standard2;standard3"
+                        value={standards}
+                        onChange={(event) => set_standards(event.target.value)}
                       />
                     </div>
-
-
+                    <div className="mb-3">
+                      <label className="font-weight-bold mb-2">
+                        Signature
+                     </label>
+                      <TextField
+                        variant="outlined"
+                        size="small"
+                        fullWidth
+                        placeholder="signature"
+                        value={signature}
+                        onChange={(event) => set_signature(event.target.value)}
+                      />
+                    </div>
                     <div className="text-center mb-4">
-                      <Button className="btn-primary text-uppercase font-weight-bold font-size-sm my-3">
-                        Submit
-                              </Button>
+                      <Button className="btn-primary text-uppercase font-weight-bold font-size-sm my-3"
+                              onClick={onSign}>
+                        Sign
+                      </Button>
                     </div>
                   </div>
                 </div>
