@@ -11,7 +11,7 @@ export default function RegisterAuditor() {
   
   const onRegisterAuditor = async () => {
     if (window.walletConnection.isSignedIn()) {
-      window.contract.register_auditor({  account_id: accountId, metadata: hash })
+      window.contract.register_auditor({ account_id: accountId, metadata: hash })
         .then(result => {
           console.log('onRegisterAuditor: ' + result);
         })
