@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import { Grid, Button, TextField, Paper } from '@material-ui/core';
 
 import IPFS from '../../ipfs'
-import Alert_INFO from '../Alert';
+import ALERT from '../Alert';
 
 export default function RegisterAuditor() {
   const [accountId, set_accountId] = useState();
@@ -30,8 +30,8 @@ export default function RegisterAuditor() {
     <>
       <div className="app-wrapper bg-white min-vh-100">
         <Grid container spacing={3}>
-          {cid ? Alert_INFO('info', 'Metadata saved on IPFS') :
-          Alert_INFO('error', 'Unable to save metadata on IPFS')}
+          {cid ? ALERT('info', 'Metadata saved on IPFS') :
+          ALERT('error', 'Unable to save metadata on IPFS')}
           <Grid item xs>
             <Paper />
           </Grid>

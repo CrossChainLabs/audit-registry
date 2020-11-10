@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import { Link } from 'react-router-dom';
-import { Grid, Paper, Button, IconButton } from '@material-ui/core';
+import { Grid, Paper } from '@material-ui/core';
 import PerfectScrollbar from 'react-perfect-scrollbar';
 
 import Header from '../Header';
@@ -77,12 +77,11 @@ export default function ProjectHistory() {
                         <div className="d-flex justify-content-between">
                           <div>
                             <div className="font-weight-bold">
-                              <a
-                                href="#/"
-                                onClick={(e) => e.preventDefault()}
+                              <Link
+                                to='/PageProjectDetails'
                                 className="text-black">
                                 {project.name}
-                              </a>
+                              </Link>
                             </div>
                             <small className="d-flex pt-2 align-items-center">
                               <a href="#/" onClick={(e) => e.preventDefault()}>

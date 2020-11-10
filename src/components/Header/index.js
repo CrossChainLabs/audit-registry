@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import { AppBar, Toolbar, Tabs, Tab, Typography } from '@material-ui/core';
-import { NavLink, Link } from 'react-router-dom';
+import { AppBar, Toolbar, Typography } from '@material-ui/core';
+import { NavLink } from 'react-router-dom';
 
 import projectLogo from '../../assets/logo-white.svg';
 import Auth from '../Auth';

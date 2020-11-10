@@ -1,26 +1,20 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Grid, Paper, Button, IconButton, Table } from '@material-ui/core';
+import { Grid, Paper, Button, IconButton, Table, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
+import { withStyles } from "@material-ui/core/styles";
+import Dialog from "@material-ui/core/Dialog";
+import MuiDialogTitle from "@material-ui/core/DialogTitle";
+import MuiDialogContent from "@material-ui/core/DialogContent";
+import MuiDialogActions from "@material-ui/core/DialogActions";
 import PerfectScrollbar from 'react-perfect-scrollbar';
-import { ViewHeadline } from "@material-ui/icons";
 import AddCircleRoundedIcon from '@material-ui/icons/AddCircleRounded';
+import MoreVertIcon from '@material-ui/icons/MoreVert';
 
 import Header from '../Header';
-import Alert_INFO from '../Alert';
+import ALERT from '../Alert';
 
-const useStyles = makeStyles((theme) => ({
-  margin: {
-    margin: theme.spacing(1),
-  },
-  extendedIcon: {
-    marginRight: theme.spacing(1), 
-  },
-}));
-export default function ProjectDetails() {
-  const classes = useStyles();
-
-  const project =
+const project =
   {
     name: 'nearup',
     codehash: '0x7889aa',
@@ -34,44 +28,99 @@ export default function ProjectDetails() {
       standards: 'EIP-5, EIP-101',
       signature: 'e-signature',
       audit_hash: '889aafff',
-      advisory_report: '889aafff',
+      advisory_hash: '889aafff',
     },
     {
       auditor: 'Auditor 2',
       standards: 'EIP-5, EIP-101',
       signature: 'e-signature      2',
       audit_hash: '889aafff',
-      advisory_report: '889aafff',
+      advisory_hash: '889aafff',
     },
     {
       auditor: 'Auditor 3',
       standards: 'EIP-5',
       signature: 'esig',
       audit_hash: '889aafff',
-      advisory_report: '889aafff',
+      advisory_hash: '889aafff',
     },
     {
       auditor: 'Auditor 4',
       standards: 'EIP-101',
       signature: 'e-signature',
       audit_hash: '889aafff',
-      advisory_report: '889aafff',
+      advisory_hash: '889aafff',
     },
     {
       auditor: 'Auditor 5',
       standards: 'EIP-5, EIP-101, EIP-105, EIP-120, EIP-131',
       signature: 'e-signature 3',
       audit_hash: '889aafff',
-      advisory_report: '889aafff',
+      advisory_hash: '889aafff',
     },
     {
       auditor: 'Auditor 6',
       standards: 'EIP-5, EIP-101',
       signature: 'e-signature',
       audit_hash: '889aafff',
-      advisory_report: '889aafff',
+      advisory_hash: '889aafff',
     },
   ];
+
+const styles = (theme) => ({
+  root: {
+    margin: 0,
+    padding: theme.spacing(2)
+  },
+});
+
+const DialogTitle = withStyles(styles)((props) => {
+  const { children, classes, onClose, ...other } = props;
+  return (
+    <MuiDialogTitle disableTypography className={classes.root} {...other}>
+      <Typography variant="h6">{children}</Typography>
+    </MuiDialogTitle>
+  );
+});
+
+const DialogContent = withStyles((theme) => ({
+  root: {
+    padding: theme.spacing(2)
+  }
+}))(MuiDialogContent);
+
+const DialogActions = withStyles((theme) => ({
+  root: {
+    margin: 0,
+    padding: theme.spacing(1)
+  }
+}))(MuiDialogActions);
+
+const useStyles = makeStyles((theme) => ({
+  margin: {
+    margin: theme.spacing(1),
+  },
+  extendedIcon: {
+    marginRight: theme.spacing(1), 
+  },
+}));
+export default function ProjectDetails() {
+  const classes = useStyles();
+  const [open, setOpen] = useState(false);
+  const [title, setTitle] = useState();
+  const [ipfsHash, setIpfsHash] = useState(null);
+
+  const handleClickOpen = (title, hash) => {
+    setIpfsHash(hash);
+    setTitle(title);
+    setOpen(true);
+  };
+
+
+  const handleClose = () => {
+    setIpfsHash(null);
+    setOpen(false);
+  };
 
   return (
     <>
@@ -81,10 +130,37 @@ export default function ProjectDetails() {
         </div>
       </div>
       <Grid container>
-      {Alert_INFO('info', 'test')}
+      {ALERT('info', 'test')}
         <Grid container spacing={6}>
           <Grid item xs>
             <Paper />
+            <Dialog
+              aria-labelledby="customized-dialog-title"
+              open={open}
+            >
+              <DialogTitle id="customized-dialog-title">
+                {title}
+              </DialogTitle>
+              <DialogContent dividers>
+                <Typography gutterBottom>
+                  {ipfsHash} 
+                  Cras mattis consectetur purus sit amet fermentum. Cras justo odio,
+                  dapibus ac facilisis in, egestas eget quam. Morbi leo risus, porta
+                  ac consectetur ac, vestibulum at eros.
+                  Praesent commodo cursus magna, vel scelerisque nisl consectetur et.
+                  Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor
+                  auctor.
+                  Aenean lacinia bibendum nulla sed consectetur. Praesent commodo
+                  cursus magna, vel scelerisque nisl consectetur et. Donec sed odio
+                  dui. Donec ullamcorper nulla non metus auctor fringilla.
+              </Typography>
+              </DialogContent>
+              <DialogActions>
+                <Button autoFocus onClick={handleClose} color="primary">
+                  Close
+            </Button>
+              </DialogActions>
+            </Dialog>
           </Grid>
           <Grid item xl={6}>
             <div className="px-3 pb-3">
@@ -125,7 +201,7 @@ export default function ProjectDetails() {
                           className={classes.margin}
                           startIcon={<AddCircleRoundedIcon />}
                           component={Link}
-                          to={'/PageReportAdvisory' + project.codehash}>
+                          to={'/PageReportAdvisory:' + project.codehash}>
                           Advisory
                       </Button>
                       </div>
@@ -161,16 +237,14 @@ export default function ProjectDetails() {
                             </div>
                           </td>
                           <td className="text-center">
-                            <Button
-                              size="small"
-                              className="btn-link d-30 p-0 btn-icon hover-scale-sm">View
-                            </Button>
+                            <IconButton  aria-label="view" onClick={() => {handleClickOpen('Audit', audit.audit_hash)}}>
+                              <MoreVertIcon />
+                            </IconButton>
                           </td>
                           <td className="text-center">
-                            <Button
-                              size="small"
-                              className="btn-link d-30 p-0 btn-icon hover-scale-sm">View
-                            </Button>
+                            <IconButton aria-label="view" onClick={() => {handleClickOpen('Advisory', audit.advisory_hash)}}>
+                              <MoreVertIcon />
+                            </IconButton>
                           </td>
                         </tr>
                         ))}

@@ -1,5 +1,4 @@
 import ipfs from 'ipfs';
-let node;
 
 export default class IPFS {
     constructor() {

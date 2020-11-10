@@ -81,12 +81,11 @@ export default function Auditors() {
                   <div className="d-flex justify-content-between">
                     <div>
                       <div className="font-weight-bold">
-                        <a
-                          href="#/"
-                          onClick={(e) => e.preventDefault()}
+                        <Link
+                          to='/PageAuditorDetails'
                           className="text-black">
                           {auditor.accountId}
-                        </a>
+                        </Link>
                       </div>
                     </div>
                     <div>
