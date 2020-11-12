@@ -5,6 +5,7 @@ import { Button, IconButton } from '@material-ui/core';
 import MoreVertRoundedIcon from '@material-ui/icons/MoreVertRounded';
 import AddCircleRoundedIcon from '@material-ui/icons/AddCircleRounded';
 import PerfectScrollbar from 'react-perfect-scrollbar';
+import { REFRESH_INTERVAL } from '../../utils'
 
 const useStyles = makeStyles((theme) => ({
   margin: {
@@ -19,14 +20,23 @@ export default function Auditors() {
   const classes = useStyles();
   const [auditors, set_auditors] = useState();
 
+  const getAuditors = () => {
+    if (window.walletConnection.isSignedIn()) {
+      window.contract.get_auditors_list()
+        .then(auditorsFromContract => {
+          set_auditors(auditorsFromContract)
+        })
+    }
+  }
+
   React.useEffect(
     () => {
-      if (window.walletConnection.isSignedIn()) {
-        window.contract.get_auditors_list()
-          .then(auditorsFromContract => {
-            set_auditors(auditorsFromContract)
-          })
-      }
+      getAuditors();
+      const interval = setInterval(() => {
+        getAuditors();
+      }, REFRESH_INTERVAL);
+
+      return () => clearInterval(interval);
     },
     []
   )

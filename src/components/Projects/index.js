@@ -4,6 +4,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { Button } from '@material-ui/core';
 import AddCircleRoundedIcon from '@material-ui/icons/AddCircleRounded';
 import PerfectScrollbar from 'react-perfect-scrollbar';
+import { REFRESH_INTERVAL } from '../../utils'
 
 const useStyles = makeStyles((theme) => ({
   margin: {
@@ -18,41 +19,50 @@ export default function Projects() {
   const classes = useStyles();
   const [projects, set_projects] = useState();
 
+  const getProjects = () => {
+    if (window.walletConnection.isSignedIn()) {
+      window.contract.get_projects_list()
+        .then(projectsFromContract => {
+          //sort
+          projectsFromContract.sort((a,b) => {
+            return b.index - a.index;
+          })
+          //extract old versions
+          let proccesedProjects = new Array();
+          projectsFromContract.forEach(project => {
+            let found = proccesedProjects.find(((element, index, arr) => {
+              if (element.url === project.url) {
+                arr[index].versions++;
+              }
+              return element.url == project.url;
+            }));
+
+            if (!found) {
+              proccesedProjects.push({
+                code_hash: project.code_hash,
+                name: project.name,
+                url: project.url,
+                metadata: project.metadata,
+                status: project.status,
+                index: project.index,
+                versions: 1
+              });
+            }
+          });
+
+          set_projects(proccesedProjects);
+        })
+    }
+  }
+
   React.useEffect(
     () => {
-      if (window.walletConnection.isSignedIn()) {
-        window.contract.get_projects_list()
-          .then(projectsFromContract => {
-            //sort
-            projectsFromContract.sort((a,b) => {
-              return b.index - a.index;
-            })
-            //extract old versions
-            let proccesedProjects = new Array();
-            projectsFromContract.forEach(project => {
-              let found = proccesedProjects.find(((element, index, arr) => {
-                if (element.url == project.url) {
-                  arr[index].versions++;
-                }
-                return element.url == project.url;
-              }));
+      getProjects();
+      const interval = setInterval(() => {
+        getProjects();
+      }, REFRESH_INTERVAL);
 
-              if (!found) {
-                proccesedProjects.push({
-                  code_hash: project.code_hash,
-                  name: project.name,
-                  url: project.url,
-                  metadata: project.metadata,
-                  status: project.status,
-                  index: project.index,
-                  versions: 1
-                });
-              }
-            });
-
-            set_projects(proccesedProjects);
-          })
-      }
+      return () => clearInterval(interval);
     },
     []
   )
