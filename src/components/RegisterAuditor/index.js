@@ -1,26 +1,82 @@
 import React, {useState} from 'react';
-import { Grid, Button, TextField, Paper } from '@material-ui/core';
+import { useCookies } from 'react-cookie';
+import { makeStyles } from '@material-ui/core/styles';
+import { Grid, Button, TextField, Paper, Collapse, IconButton } from '@material-ui/core';
+import CloseIcon from '@material-ui/icons/Close';
+import Alert from '@material-ui/lab/Alert';
 
 import IPFS from '../../ipfs'
-import ALERT from '../Alert';
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    width: '100%',
+    '& > * + *': {
+      marginTop: theme.spacing(2),
+    },
+  },
+}));
 
 export default function RegisterAuditor() {
-  const [accountId, set_accountId] = useState();
-  const [metadata, set_metadata] = useState();
-  const [cid, set_cid] = useState();
+  const classes = useStyles();
+  const [open, setOpen] = React.useState(false);
+  const [message, setMessage] = React.useState('');
+  const [severity, setSeverity] = React.useState('info');
+  const [cookies, setCookie] = useCookies([
+    'auditorAccountId',
+    'auditorMetadata',
+    'registerAuditor'
+  ]);
+
+  React.useEffect(
+    () => {
+      if (window.walletConnection.isSignedIn() && cookies.registerAuditor === 'true') {
+        window.contract.get_auditors_list()
+          .then(auditorsFromContract => {
+            let added = false;
+            auditorsFromContract.map((auditor) => {
+              if (auditor.accountId === cookies.auditorAccountId) {
+                added = true;
+              }
+            });
+
+            if (added) {
+              setSeverity('success');
+              setMessage(`Auditor ${cookies.auditorAccountId} successfuly added !`);
+
+              setCookie('auditorAccountId', '', { path: '/' });
+              setCookie('auditorMetadata', '', { path: '/' });
+            } else {
+              setSeverity('error');
+              setMessage(`Unable to add auditor ${cookies.auditorAccountId} !`);
+            }
+
+            setCookie('registerAuditor', 'false', { path: '/' });
+            setOpen(true);
+          })
+      }
+    },
+    []
+  )
   
   const onRegisterAuditor = async () => {
     if (window.walletConnection.isSignedIn()) {
-      let metadata_hash = await IPFS.getInstance().Save(metadata);
+      let metadata_hash = await IPFS.getInstance().Save(cookies.auditorMetadata);
+
       if (!metadata_hash) {
         //Unable to save metadata on IPFS'
+        setSeverity('error');
+        setMessage('Unable to save metadata on IPFS !');
+        setOpen(true);
+
         return;
       }
 
-      set_cid(metadata_hash);
+      setCookie('registerAuditor', 'true', { path: '/' });
 
-      window.contract.register_auditor({ account_id: accountId, metadata: metadata_hash })
-        .then(result => {
+      window.contract.register_auditor({
+        account_id: cookies.auditorAccountId,
+        metadata: metadata_hash
+      }).then(result => {
           console.log('onRegisterAuditor: ' + result);
         })
     }
@@ -30,8 +86,21 @@ export default function RegisterAuditor() {
     <>
       <div className="app-wrapper bg-white min-vh-100">
         <Grid container spacing={3}>
-          {cid ? ALERT('info', 'Metadata saved on IPFS') :
-          ALERT('error', 'Unable to save metadata on IPFS')}
+          <div className={classes.root}>
+            <Collapse in={open}>
+              <Alert
+                severity={severity}
+                action={
+                  <IconButton aria-label="close" color="inherit" size="small"
+                    onClick={() => { setOpen(false); }}>
+                    <CloseIcon fontSize="inherit" />
+                  </IconButton>
+                }
+              >
+                {message}
+              </Alert>
+            </Collapse>
+          </div>
           <Grid item xs>
             <Paper />
           </Grid>
@@ -57,8 +126,8 @@ export default function RegisterAuditor() {
                         size="small"
                         fullWidth
                         placeholder="account id"
-                        value={accountId}
-                        onChange={(event) => set_accountId(event.target.value)}
+                        value={cookies.auditorAccountId}
+                        onChange={(event) => setCookie('auditorAccountId', event.target.value, { path: '/' })}
                       />
                     </div>
                     <div className="mb-3">
@@ -72,8 +141,8 @@ export default function RegisterAuditor() {
                         multiline
                         rows={10}
                         placeholder="metadata"
-                        value={metadata}
-                        onChange={(event) => set_metadata(event.target.value)}
+                        value={cookies.auditorMetadata}
+                        onChange={(event) => setCookie('auditorMetadata', event.target.value, { path: '/' })}
                       />
                     </div>
 

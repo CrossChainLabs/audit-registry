@@ -12,7 +12,6 @@ import AddCircleRoundedIcon from '@material-ui/icons/AddCircleRounded';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 
 import Header from '../Header';
-import ALERT from '../Alert';
 
 const project =
   {
@@ -130,7 +129,6 @@ export default function ProjectDetails() {
         </div>
       </div>
       <Grid container>
-      {ALERT('info', 'test')}
         <Grid container spacing={6}>
           <Grid item xs>
             <Paper />

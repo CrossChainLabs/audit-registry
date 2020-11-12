@@ -5,43 +5,38 @@ import PerfectScrollbar from 'react-perfect-scrollbar';
 
 import Header from '../Header';
 
-const projectsData = [
-  {
-    name: 'nearup',
-    codehash: '0x7889aa',
-    url: 'https://github.com/near/nearup',
-    standards: 'EIP-5, EIP-101',
-    advisory_report: 'advisory_report_hash',
-    completed: true
-  },
-  {
-    name: 'nearup',
-    codehash: '0xab87ba',
-    url: 'https://github.com/near/nearup',
-    standards: 'EIP-5, EIP-101, EIP-102',
-    advisory_report: undefined,
-    completed: true
-  },
-  {
-    name: 'nearup',
-    codehash: '0x1236ba',
-    url: 'https://github.com/near/nearup',
-    advisory_report: 'advisory_report_hash',
-    standards: '',
-    completed: false
-  },
-  {
-    name: 'nearup',
-    codehash: '0xddfd0a',
-    url: 'https://github.com/near/nearup',
-    standards: 'EIP-5',
-    advisory_report: 'advisory_report_hash',
-    completed: true
-  }
-];
 
-export default function ProjectHistory() {
-  const [projects] = useState(projectsData);
+export default function ProjectHistory(url) {
+  const [projects, set_projects] = useState();
+  const [name, set_name] = useState();
+
+  React.useEffect(
+    () => {
+      if (window.walletConnection.isSignedIn()) {
+        window.contract.get_projects_list()
+          .then(projectsFromContract => {
+            if (projectsFromContract.length < 1)
+              return;
+            //sort
+            projectsFromContract.sort((a,b) => {
+              return b.index - a.index;
+            });
+
+            set_name(projectsFromContract[0].name);
+            //extract old versions
+            let proccesedProjects = new Array();
+            projectsFromContract.forEach(project => {
+              if (project.url === url) {
+                proccesedProjects.push(project);
+              }
+            });
+
+            set_projects(proccesedProjects);
+          })
+      }
+    },
+    []
+  )
 
   return (
     <>
@@ -59,11 +54,11 @@ export default function ProjectHistory() {
             <div className="card-header-alt d-flex justify-content-between p-4">
               <div>
                 <h6 className="font-weight-bold font-size-lg mb-1 text-black">
-                  nearup
+                  {name}
             </h6>
                 <small className="d-flex pt-2 align-items-center">
                   <a href="#/" onClick={(e) => e.preventDefault()}>
-                  https://github.com/near/nearup
+                    {url}
                   </a>
                 </small>
               </div>
@@ -72,20 +67,20 @@ export default function ProjectHistory() {
               <div className="bg-white">
                 <PerfectScrollbar>
                   <div className="p-3">
-                    {projects.map((project, i) => (
+                    {projects ? projects.map((project, i) => (
                       <div>
                         <div className="d-flex justify-content-between">
                           <div>
                             <div className="font-weight-bold">
                               <Link
-                                to='/PageProjectDetails'
+                                to={'/PageProjectDetails' + project.code_hash}
                                 className="text-black">
                                 {project.name}
                               </Link>
                             </div>
                             <small className="d-flex pt-2 align-items-center">
                               <a href="#/" onClick={(e) => e.preventDefault()}>
-                                codehash: {project.codehash}
+                                codehash: {project.code_hash}
                               </a>
                             </small>
                           </div>
@@ -100,7 +95,7 @@ export default function ProjectHistory() {
                           <div className="divider my-3" /> : ''
                         }
                       </div>
-                    ))}
+                    )) : ''}
                   </div>
                 </PerfectScrollbar>
               </div>

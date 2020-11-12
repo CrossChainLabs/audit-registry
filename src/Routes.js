@@ -45,8 +45,8 @@ const Routes = () => {
             '/PageRegisterAuditor',
             '/PageReportAdvisory:codehash',
             '/PageSignAudit:codehash',
-            '/PageProjectHistory',
-            '/PageProjectDetails',
+            '/PageProjectHistory:url',
+            '/PageProjectDetails:codehash',
             '/PageAuditorDetails',
             '/Login'
             ]}>
@@ -56,8 +56,8 @@ const Routes = () => {
                 <Route path="/PageRegisterAuditor" component={PageRegisterAuditor}/>
                 <Route path="/PageReportAdvisory:codehash" component={PageReportAdvisory}/>
                 <Route path="/PageSignAudit:codehash" component={PageSignAudit}/>
-                <Route path="/PageProjectHistory" component={PageProjectHistory}/>
-                <Route path="/PageProjectDetails" component={PageProjectDetails}/>
+                <Route path="/PageProjectHistory:url" component={PageProjectHistory}/>
+                <Route path="/PageProjectDetails:codehash" component={PageProjectDetails}/>
                 <Route path="/PageAuditorDetails" component={PageAuditorDetails}/>
                 <Route path="/Login" component={LoginPage}/>
             </Switch>

@@ -4,7 +4,6 @@ import { Grid, Paper } from '@material-ui/core';
 import PerfectScrollbar from 'react-perfect-scrollbar';
 
 import Header from '../Header';
-import ALERT from '../Alert';
 
 const auditor =
   {
@@ -22,7 +21,6 @@ export default function AuditorDetails() {
         </div>
       </div>
       <Grid container>
-      {ALERT('info', 'test')}
         <Grid container spacing={6}>
           <Grid item xs>
             <Paper />

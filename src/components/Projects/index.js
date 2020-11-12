@@ -14,48 +14,48 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const projectsData = [
-  {
-    name: 'near-cli',
-    codehash: '0x3663ba',
-    url: 'https://github.com/near/near-cli',
-    completed: true
-  },
-  {
-    name: 'nearup',
-    codehash: '0xab87ba',
-    url: 'https://github.com/near/nearup',
-    completed: true
-  },
-  {
-    name: 'go-ethereum',
-    codehash: '0xaa63ba',
-    url: 'https://github.com/ethereum/go-ethereum',
-    completed: false
-  },
-  {
-    name: 'solidity',
-    codehash: '0x6763cc',
-    url: 'https://github.com/ethereum/solidity',
-    completed: true
-  },
-  {
-    name: 'eth-utils',
-    codehash: '0x7763af',
-    url: 'https://github.com/ethereum/eth-utils',
-    completed: false
-  },
-  {
-    name: 'evmone',
-    codehash: '0x4663dd',
-    url: 'https://github.com/ethereum/evmone',
-    completed: true
-  }
-];
-
 export default function Projects() {
   const classes = useStyles();
-  const [projects] = useState(projectsData);
+  const [projects, set_projects] = useState();
+
+  React.useEffect(
+    () => {
+      if (window.walletConnection.isSignedIn()) {
+        window.contract.get_projects_list()
+          .then(projectsFromContract => {
+            //sort
+            projectsFromContract.sort((a,b) => {
+              return b.index - a.index;
+            })
+            //extract old versions
+            let proccesedProjects = new Array();
+            projectsFromContract.forEach(project => {
+              let found = proccesedProjects.find(((element, index, arr) => {
+                if (element.url == project.url) {
+                  arr[index].versions++;
+                }
+                return element.url == project.url;
+              }));
+
+              if (!found) {
+                proccesedProjects.push({
+                  code_hash: project.code_hash,
+                  name: project.name,
+                  url: project.url,
+                  metadata: project.metadata,
+                  status: project.status,
+                  index: project.index,
+                  versions: 1
+                });
+              }
+            });
+
+            set_projects(proccesedProjects);
+          })
+      }
+    },
+    []
+  )
 
   return (
     <>
@@ -79,20 +79,19 @@ export default function Projects() {
                 </Button>
               </div>
               <div className="divider my-3" />
-              {projects.map((project, i) => (
+              {projects ? projects.map((project, i) => (
                 <div>
                   <div className="d-flex justify-content-between">
                     <div>
                       <div className="font-weight-bold">
-                        <Link
-                          to='/PageProjectHistory'
-                          className="text-black">
-                          {project.name}
-                        </Link>
+
+                        {(project.versions > 1) ?
+                        <Link to={'/PageProjectHistory' + project.url} className="text-black">{project.name}</Link> : 
+                        <Link to={'/PageProjectDetails' + project.code_hash} className="text-black">{project.name}</Link> }
                       </div>
                       <small className="d-flex pt-2 align-items-center">
                         <a href="#/" onClick={(e) => e.preventDefault()}>
-                          codehash: {project.codehash}
+                          codehash: {project.code_hash}
                         </a>
                       </small>
                     </div>
@@ -107,7 +106,7 @@ export default function Projects() {
                     <div className="divider my-3" /> : ''
                   }
                 </div>
-              ))}
+              )) : ''}
             </div>
           </PerfectScrollbar>
         </div>

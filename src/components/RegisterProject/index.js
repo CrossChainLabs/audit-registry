@@ -1,21 +1,87 @@
 import React, {useState} from 'react';
-import { Grid, Button, TextField, Paper } from '@material-ui/core';
+import { useCookies } from 'react-cookie';
+import { makeStyles } from '@material-ui/core/styles';
+import { Grid, Button, TextField, Paper, Collapse, IconButton } from '@material-ui/core';
+import CloseIcon from '@material-ui/icons/Close';
+import Alert from '@material-ui/lab/Alert';
+
+import IPFS from '../../ipfs'
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    width: '100%',
+    '& > * + *': {
+      marginTop: theme.spacing(2),
+    },
+  },
+}));
 
 export default function RegisterProject() {
-  const [name, set_name] = useState();
-  const [url, set_url] = useState();
-  const [metadata, set_metadata] = useState();
-  const [codeHash, set_codeHash] = useState();
+  const classes = useStyles();
+  const [open, setOpen] = React.useState(false);
+  const [message, setMessage] = React.useState('');
+  const [severity, setSeverity] = React.useState('info');
+  const [cookies, setCookie] = useCookies(['projectName',
+    'projectUrl',
+    'projectMetadata',
+    'projectCodeHash',
+    'registerProject']);
+
+  React.useEffect(
+    () => {
+      if (window.walletConnection.isSignedIn() && cookies.registerProject === 'true') {
+        window.contract.get_projects_list()
+          .then(projectsFromContract => {
+            let added = false;
+            projectsFromContract.map((project) => {
+              if (project.code_hash === cookies.projectCodeHash) {
+                added = true;
+              }
+            });
+
+            if (added) {
+              setSeverity('success');
+              setMessage(`Project ${cookies.projectName} successfuly added !`);
+
+              setCookie('projectName', '', { path: '/' });
+              setCookie('projectUrl', '', { path: '/' });
+              setCookie('projectMetadata', '', { path: '/' });
+              setCookie('projectCodeHash', '', { path: '/' });
+            } else {
+              setSeverity('error');
+              setMessage(`Unable to add project ${cookies.projectName} !`);
+            }
+
+            setCookie('registerProject', 'false', { path: '/' });
+            setOpen(true);
+          })
+      }
+    },
+    []
+  )
 
   const onSubmit = async () => {
     if (window.walletConnection.isSignedIn()) {
+      let metadata_hash = await IPFS.getInstance().Save(cookies.projectMetadata);
+
+      if (!metadata_hash) {
+        //Unable to save metadata on IPFS'
+        setSeverity('error');
+        setMessage('Unable to save metadata on IPFS !');
+        setOpen(true);
+
+        return;
+      }
+
+      setCookie('registerProject', 'true', { path: '/' });
+
       window.contract.register_project({ 
-        name: name, 
-        url: url,
-        metadata: metadata,
-        code_hash: codeHash
+        name: cookies.projectName, 
+        url: cookies.projectUrl,
+        metadata: metadata_hash,
+        code_hash: cookies.projectCodeHash
       }).then(result => {
-          console.log('onSignAudit: ' + result);
+          console.log('onRegisterProject: ' + result);
         })
     }
   }
@@ -24,6 +90,21 @@ export default function RegisterProject() {
     <>
       <div className="app-wrapper bg-white min-vh-100">
         <Grid container spacing={3}>
+          <div className={classes.root}>
+            <Collapse in={open}>
+              <Alert
+                severity={severity}
+                action={
+                  <IconButton aria-label="close" color="inherit" size="small"
+                    onClick={() => { setOpen(false); }}>
+                    <CloseIcon fontSize="inherit" />
+                  </IconButton>
+                }
+              >
+                {message}
+              </Alert>
+            </Collapse>
+          </div>
           <Grid item xs>
             <Paper />
           </Grid>
@@ -49,8 +130,8 @@ export default function RegisterProject() {
                         size="small"
                         fullWidth
                         placeholder="project name"
-                        value={name}
-                        onChange={(event) => set_name(event.target.value)}
+                        value={cookies.projectName}
+                        onChange={(event) => setCookie('projectName', event.target.value, { path: '/' })}
                       />
                     </div>
                     <div className="mb-3">
@@ -62,8 +143,8 @@ export default function RegisterProject() {
                         size="small"
                         fullWidth
                         placeholder="project url"
-                        value={url}
-                        onChange={(event) => set_url(event.target.value)}
+                        value={cookies.projectUrl}
+                        onChange={(event) => setCookie('projectUrl', event.target.value, { path: '/' })}
                       />
                     </div>
                     <div className="mb-3">
@@ -75,8 +156,8 @@ export default function RegisterProject() {
                         size="small"
                         fullWidth
                         placeholder="code hash"
-                        value={codeHash}
-                        onChange={(event) => set_codeHash(event.target.value)}
+                        value={cookies.projectCodeHash}
+                        onChange={(event) => setCookie('projectCodeHash', event.target.value, { path: '/' })}
                       />
                     </div>
                     <div className="mb-3">
@@ -90,8 +171,8 @@ export default function RegisterProject() {
                         multiline
                         rows={10}
                         placeholder="project metadata"
-                        value={metadata}
-                        onChange={(event) => set_metadata(event.target.value)}
+                        value={cookies.projectMetadata}
+                        onChange={(event) => setCookie('projectMetadata', event.target.value, { path: '/' })}
                       />
                     </div>
                     <div className="text-center mb-4">

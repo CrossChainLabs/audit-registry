@@ -3,11 +3,14 @@ import ReactDOM from 'react-dom';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 import { initContract } from './utils'
+import { CookiesProvider } from 'react-cookie';
 
 window.nearInitPromise = initContract()
   .then(() => {
     ReactDOM.render(
-      <App />,
+      <CookiesProvider>
+        <App />
+      </CookiesProvider>,
       document.querySelector('#root')
     )
   })
