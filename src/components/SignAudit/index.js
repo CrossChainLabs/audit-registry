@@ -23,6 +23,7 @@ export default function SignAudit(codehash) {
   const [message, setMessage] = React.useState('');
   const [severity, setSeverity] = React.useState('info');
   const [cookies, setCookie] = useCookies([
+    'signAudit',
     'auditData',
     'audit_hash',
     'standards',
@@ -34,12 +35,8 @@ export default function SignAudit(codehash) {
       if (window.walletConnection.isSignedIn() && cookies.signAudit === 'true') {
         window.contract.get_project_certificates({ code_hash: codehash })
           .then(certificatesFromContract => {
-
             let added = false;
             certificatesFromContract.forEach(certificateFromContract => {
-              console.log(JSON.stringify(certificateFromContract));
-              console.log('codehash: ' + codehash);
-              console.log('audit_hash: ' + cookies.audit_hash);
               if ((certificateFromContract.code_hash === codehash) &&
                  (certificateFromContract.audit_hash === cookies.audit_hash))
               {
@@ -60,7 +57,7 @@ export default function SignAudit(codehash) {
               setMessage(`Unable to add audit for codehash ${codehash} !`);
             }
 
-            setCookie('signAudit', 'true', { path: '/' });
+            setCookie('signAudit', 'false', { path: '/' });
             setOpen(true);
           })
       }

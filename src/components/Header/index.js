@@ -1,6 +1,6 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import { AppBar, Toolbar, Typography } from '@material-ui/core';
+import { AppBar, Toolbar, Typography, Link } from '@material-ui/core';
 import { NavLink } from 'react-router-dom';
 
 import projectLogo from '../../assets/logo-white.svg';
@@ -9,6 +9,8 @@ import Auth from '../Auth';
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
+    color: 'white',
+    fontSize: '2rem'
   },
   flex: {
     flexGrow: 1,
@@ -27,22 +29,20 @@ export default function Header() {
 
   return (
     <>
-    <div className={classes.root}>
+    <div className={classes.flex}>
       <AppBar position="fixed">
         <Toolbar disableGutters>
-          <NavLink to="/Homepage" title="Audit Registry" className="app-nav-logo">
+          <NavLink to="/Homepage" title="Audit Registry" className="app-nav-logo flex">
               <img
                 alt="Audit Registry"
                 className={classes.logo}
                 src={projectLogo}
               />
-          </NavLink>
-          <Typography variant="title" color="inherit" className={classes.flex}>
-          <h2 className="mb-1 text-white">
-                Audit Registry
-          </h2>
-          </Typography>
-          <Auth />
+            </NavLink>
+            <Typography className={classes.root}>
+              Audit Registry
+      </Typography>
+            <Auth />
         </Toolbar>
       </AppBar>
       <div className={classes.toolbarMargin} />

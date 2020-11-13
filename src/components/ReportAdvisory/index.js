@@ -1,13 +1,87 @@
 import React, {useState} from 'react';
-import { Grid, Button, TextField, Paper } from '@material-ui/core';
+import { useCookies } from 'react-cookie';
+import { makeStyles } from '@material-ui/core/styles';
+import { Grid, Button, TextField, Paper, Collapse, IconButton } from '@material-ui/core';
+import CloseIcon from '@material-ui/icons/Close';
+import Alert from '@material-ui/lab/Alert';
+
+import IPFS from '../../ipfs'
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    width: '100%',
+    '& > * + *': {
+      marginTop: theme.spacing(2),
+    },
+  },
+}));
 
 export default function ReportAdvisory(codehash) {
+  const classes = useStyles();
   const [codeHash, set_codeHash] = useState(codehash);
-  const [advisoryHash, set_advisoryHash] = useState();
+  const [open, setOpen] = React.useState(false);
+  const [message, setMessage] = React.useState('');
+  const [severity, setSeverity] = React.useState('info');
+  const [cookies, setCookie] = useCookies([
+    'reportAdvisory',
+    'advisoryData',
+    'advisory_hash'
+  ]);
+
+  React.useEffect(
+    () => {
+      if (window.walletConnection.isSignedIn() && cookies.reportAdvisory === 'true') {
+        window.contract.get_project_certificates({ code_hash: codehash })
+          .then(certificatesFromContract => {
+            let added = false;
+            certificatesFromContract.forEach(certificateFromContract => {
+              console.log(JSON.stringify(certificateFromContract));
+              console.log('codehash: ' + codehash);
+              console.log('advisory_hash: ' + cookies.advisory_hash);
+              if ((certificateFromContract.code_hash === codehash) &&
+                 (certificateFromContract.advisory_hash === cookies.advisory_hash))
+              {
+                added = true;
+              }
+            });
+
+            if (added) {
+              setSeverity('success');
+              setMessage(`Advisory for codehash ${codehash} successfuly added !`);
+
+              setCookie('advisoryData', '', { path: '/' });
+              setCookie('advisory_hash', '', { path: '/' });
+            } else {
+              setSeverity('error');
+              setMessage(`Unable to add advisory for codehash ${codehash} !`);
+            }
+
+            setCookie('reportAdvisory', 'false', { path: '/' });
+            setOpen(true);
+          })
+      }
+    },
+    []
+  )
+
   
   const onAdvisoryReport = async () => {
     if (window.walletConnection.isSignedIn()) {
-      window.contract.report_advisory({ code_hash: codeHash, advisory_hash: advisoryHash })
+      let advisory_hash = await IPFS.getInstance().Save(cookies.advisoryData);
+
+      if (!advisory_hash) {
+        //Unable to save metadata on IPFS'
+        setSeverity('error');
+        setMessage('Unable to save advisory data on IPFS !');
+        setOpen(true);
+
+        return;
+      }
+
+      setCookie('reportAdvisory', 'true', { path: '/' });
+      setCookie('advisory_hash', advisory_hash, { path: '/' });
+
+      window.contract.report_advisory({ code_hash: codehash, advisory_hash: advisory_hash })
         .then(result => {
           alert('onAdvisoryReport: ' + result);
         });
@@ -18,6 +92,21 @@ export default function ReportAdvisory(codehash) {
     <>
       <div className="app-wrapper bg-white min-vh-100">
         <Grid container spacing={3}>
+        <div className={classes.root}>
+            <Collapse in={open}>
+              <Alert
+                severity={severity}
+                action={
+                  <IconButton aria-label="close" color="inherit" size="small"
+                    onClick={() => { setOpen(false); }}>
+                    <CloseIcon fontSize="inherit" />
+                  </IconButton>
+                }
+              >
+                {message}
+              </Alert>
+            </Collapse>
+          </div>
           <Grid item xs>
             <Paper />
           </Grid>
@@ -58,8 +147,8 @@ export default function ReportAdvisory(codehash) {
                         multiline
                         rows={10}
                         placeholder="advisory report"
-                        value={advisoryHash}
-                        onChange={(event) => set_advisoryHash(event.target.value)}
+                        value={cookies.advisoryData}
+                        onChange={(event) => setCookie('advisoryData', event.target.value, { path: '/' })}
                       />
                     </div>
 
