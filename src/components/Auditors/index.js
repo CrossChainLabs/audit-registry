@@ -71,7 +71,7 @@ export default function Auditors() {
                         <Link
                           to='/PageAuditorDetails'
                           className="text-black">
-                          {auditor.accountId}
+                          {auditor.account_id}
                         </Link>
                       </div>
                     </div>

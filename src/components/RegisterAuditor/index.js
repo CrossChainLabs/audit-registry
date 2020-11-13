@@ -34,7 +34,7 @@ export default function RegisterAuditor() {
           .then(auditorsFromContract => {
             let added = false;
             auditorsFromContract.map((auditor) => {
-              if (auditor.accountId === cookies.auditorAccountId) {
+              if (auditor.account_id === cookies.auditorAccountId) {
                 added = true;
               }
             });
