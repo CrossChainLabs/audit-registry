@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
-import { Button, IconButton } from '@material-ui/core';
+import { Button, IconButton, Badge } from '@material-ui/core';
 import MoreVertRoundedIcon from '@material-ui/icons/MoreVertRounded';
 import AddCircleRoundedIcon from '@material-ui/icons/AddCircleRounded';
 import PerfectScrollbar from 'react-perfect-scrollbar';
@@ -9,7 +9,8 @@ import { REFRESH_INTERVAL } from '../../utils'
 
 const useStyles = makeStyles((theme) => ({
   margin: {
-    margin: theme.spacing(1),
+    margin: theme.spacing(0),
+    marginBottom: theme.spacing(2),
   },
   extendedIcon: {
     marginRight: theme.spacing(1),
@@ -76,9 +77,9 @@ export default function Auditors() {
                       </div>
                     </div>
                     <div>
-                      <IconButton aria-label="Details">
-                        <MoreVertRoundedIcon />
-                      </IconButton>
+                      <div className="badge badge-info ml-3">
+                        23 audits
+                        </div>
                     </div>
                   </div>
                   { (i < auditors.length - 1) ?

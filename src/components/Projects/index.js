@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
-import { Button } from '@material-ui/core';
+import { Badge, Button } from '@material-ui/core';
 import AddCircleRoundedIcon from '@material-ui/icons/AddCircleRounded';
 import PerfectScrollbar from 'react-perfect-scrollbar';
 import { REFRESH_INTERVAL } from '../../utils'
 
 const useStyles = makeStyles((theme) => ({
   margin: {
-    margin: theme.spacing(1),
+    margin: theme.spacing(0),
+    marginBottom: theme.spacing(2),
   },
   extendedIcon: {
     marginRight: theme.spacing(1),
@@ -106,10 +107,12 @@ export default function Projects() {
                       </small>
                     </div>
                     <div>
-                      {(project.completed) ?
-                        <div className="badge badge-success">Completed</div> :
-                        <div className="badge badge-warning">Pending</div>
-                      }
+                      <Badge className="mx-2" badgeContent={5} max={99} color="secondary">
+                        {(project.completed || true) ?
+                          <div className="badge badge-success">Completed</div> :
+                          <div className="badge badge-warning">Pending</div>
+                        }
+                      </Badge>
                     </div>
                   </div>
                   { (i < projects.length - 1) ?
