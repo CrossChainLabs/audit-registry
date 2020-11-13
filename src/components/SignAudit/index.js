@@ -1,21 +1,94 @@
 import React, {useState} from 'react';
-import { Grid, Button, TextField, Paper } from '@material-ui/core';
+import { useCookies } from 'react-cookie';
+import { makeStyles } from '@material-ui/core/styles';
+import { Grid, Button, TextField, Paper, Collapse, IconButton } from '@material-ui/core';
+import CloseIcon from '@material-ui/icons/Close';
+import Alert from '@material-ui/lab/Alert';
 
 import IPFS from '../../ipfs'
 
+const useStyles = makeStyles((theme) => ({
+  root: {
+    width: '100%',
+    '& > * + *': {
+      marginTop: theme.spacing(2),
+    },
+  },
+}));
+
 export default function SignAudit(codehash) {
+  const classes = useStyles();
   const [codeHash, set_codeHash] = useState(codehash);
-  const [auditData, set_auditData] = useState();
-  const [standards, set_standards] = useState();
-  const [signature, set_signature] = useState();
+  const [open, setOpen] = React.useState(false);
+  const [message, setMessage] = React.useState('');
+  const [severity, setSeverity] = React.useState('info');
+  const [cookies, setCookie] = useCookies([
+    'auditData',
+    'audit_hash',
+    'standards',
+    'signature'
+  ]);
+
+  React.useEffect(
+    () => {
+      if (window.walletConnection.isSignedIn() && cookies.signAudit === 'true') {
+        window.contract.get_project_certificates({ code_hash: codehash })
+          .then(certificatesFromContract => {
+
+            let added = false;
+            certificatesFromContract.forEach(certificateFromContract => {
+              console.log(JSON.stringify(certificateFromContract));
+              console.log('codehash: ' + codehash);
+              console.log('audit_hash: ' + cookies.audit_hash);
+              if ((certificateFromContract.code_hash === codehash) &&
+                 (certificateFromContract.audit_hash === cookies.audit_hash))
+              {
+                added = true;
+              }
+            });
+
+            if (added) {
+              setSeverity('success');
+              setMessage(`Audit for codehash ${codehash} successfuly added !`);
+
+              setCookie('auditData', '', { path: '/' });
+              setCookie('audit_hash', '', { path: '/' });
+              setCookie('standards', '', { path: '/' });
+              setCookie('signature', '', { path: '/' });
+            } else {
+              setSeverity('error');
+              setMessage(`Unable to add audit for codehash ${codehash} !`);
+            }
+
+            setCookie('signAudit', 'true', { path: '/' });
+            setOpen(true);
+          })
+      }
+    },
+    []
+  )
 
   const onSign = async () => {
     if (window.walletConnection.isSignedIn()) {
+      let audit_hash = await IPFS.getInstance().Save(cookies.auditData);
+
+      if (!audit_hash) {
+        //Unable to save metadata on IPFS'
+        setSeverity('error');
+        setMessage('Unable to save audit data on IPFS !');
+        setOpen(true);
+
+        return;
+      }
+
+      setCookie('signAudit', 'true', { path: '/' });
+      setCookie('audit_hash', audit_hash, { path: '/' });
+
       window.contract.sign_audit({ 
         code_hash: codeHash, 
-        audit_hash: auditData,
-        standards: standards.split(";"),
-        signature: signature
+        audit_hash: audit_hash,
+        standards: cookies.standards.split(";"),
+        signature: cookies.signature
       }).then(result => {
           console.log('onSignAudit: ' + result);
         })
@@ -26,6 +99,21 @@ export default function SignAudit(codehash) {
     <>
       <div className="app-wrapper bg-white min-vh-100">
         <Grid container spacing={3}>
+        <div className={classes.root}>
+            <Collapse in={open}>
+              <Alert
+                severity={severity}
+                action={
+                  <IconButton aria-label="close" color="inherit" size="small"
+                    onClick={() => { setOpen(false); }}>
+                    <CloseIcon fontSize="inherit" />
+                  </IconButton>
+                }
+              >
+                {message}
+              </Alert>
+            </Collapse>
+          </div>
           <Grid item xs>
             <Paper />
           </Grid>
@@ -64,8 +152,8 @@ export default function SignAudit(codehash) {
                         size="small"
                         fullWidth
                         placeholder="ex: standard1;standard2;standard3"
-                        value={standards}
-                        onChange={(event) => set_standards(event.target.value)}
+                        value={cookies.standards}
+                        onChange={(event) => setCookie('standards', event.target.value, { path: '/' })}
                       />
                     </div>
                     <div className="mb-3">
@@ -77,8 +165,8 @@ export default function SignAudit(codehash) {
                         size="small"
                         fullWidth
                         placeholder="signature"
-                        value={signature}
-                        onChange={(event) => set_signature(event.target.value)}
+                        value={cookies.signature}
+                        onChange={(event) => setCookie('signature', event.target.value, { path: '/' })}
                       />
                     </div>
                     <div className="mb-3">
@@ -92,8 +180,8 @@ export default function SignAudit(codehash) {
                         multiline
                         rows={10}
                         placeholder="audit findings"
-                        value={auditData}
-                        onChange={(event) => set_auditData(event.target.value)}
+                        value={cookies.auditData}
+                        onChange={(event) => setCookie('auditData', event.target.value, { path: '/' })}
                       />
                     </div>
                     <div className="text-center mb-4">
