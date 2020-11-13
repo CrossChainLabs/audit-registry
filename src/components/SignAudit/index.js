@@ -12,7 +12,7 @@ export default function SignAudit(codehash) {
       window.contract.sign_audit({ 
         code_hash: codeHash, 
         audit_hash: auditHash,
-        standards: standards,
+        standards: standards.split(";"),
         signature: signature
       }).then(result => {
           console.log('onSignAudit: ' + result);

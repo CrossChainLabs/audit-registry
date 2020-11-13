@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Grid, Paper, Button, IconButton, Table, Typography } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
-import { withStyles } from "@material-ui/core/styles";
+import { Grid, Paper, Button, IconButton, Table, Typography, Collapse } from '@material-ui/core';
+import CloseIcon from '@material-ui/icons/Close';
+import Alert from '@material-ui/lab/Alert';
+import { makeStyles, withStyles } from '@material-ui/core/styles';
 import Dialog from "@material-ui/core/Dialog";
 import MuiDialogTitle from "@material-ui/core/DialogTitle";
 import MuiDialogContent from "@material-ui/core/DialogContent";
@@ -12,59 +13,6 @@ import AddCircleRoundedIcon from '@material-ui/icons/AddCircleRounded';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 
 import Header from '../Header';
-
-const project =
-  {
-    name: 'nearup',
-    codehash: '0x7889aa',
-    url: 'https://github.com/near/nearup',
-    completed: true
-  };
-
-  const audits = [
-    {
-      auditor: 'Auditor 1',
-      standards: 'EIP-5, EIP-101',
-      signature: 'e-signature',
-      audit_hash: '889aafff',
-      advisory_hash: '889aafff',
-    },
-    {
-      auditor: 'Auditor 2',
-      standards: 'EIP-5, EIP-101',
-      signature: 'e-signature      2',
-      audit_hash: '889aafff',
-      advisory_hash: '889aafff',
-    },
-    {
-      auditor: 'Auditor 3',
-      standards: 'EIP-5',
-      signature: 'esig',
-      audit_hash: '889aafff',
-      advisory_hash: '889aafff',
-    },
-    {
-      auditor: 'Auditor 4',
-      standards: 'EIP-101',
-      signature: 'e-signature',
-      audit_hash: '889aafff',
-      advisory_hash: '889aafff',
-    },
-    {
-      auditor: 'Auditor 5',
-      standards: 'EIP-5, EIP-101, EIP-105, EIP-120, EIP-131',
-      signature: 'e-signature 3',
-      audit_hash: '889aafff',
-      advisory_hash: '889aafff',
-    },
-    {
-      auditor: 'Auditor 6',
-      standards: 'EIP-5, EIP-101',
-      signature: 'e-signature',
-      audit_hash: '889aafff',
-      advisory_hash: '889aafff',
-    },
-  ];
 
 const styles = (theme) => ({
   root: {
@@ -95,31 +43,165 @@ const DialogActions = withStyles((theme) => ({
   }
 }))(MuiDialogActions);
 
+
 const useStyles = makeStyles((theme) => ({
+  root: {
+    width: '100%',
+    '& > * + *': {
+      marginTop: theme.spacing(2),
+    },
+  },
   margin: {
     margin: theme.spacing(1),
   },
   extendedIcon: {
-    marginRight: theme.spacing(1), 
+    marginRight: theme.spacing(1),
   },
 }));
-export default function ProjectDetails() {
+
+
+
+export default function ProjectDetails(codehash) {
   const classes = useStyles();
-  const [open, setOpen] = useState(false);
+  const [certificates, setCertificates] = useState();
+  const [openPopup, setOpenPopup] = useState(false);
   const [title, setTitle] = useState();
+  const [project, setProject] = useState();
   const [ipfsHash, setIpfsHash] = useState(null);
+  const [open, setOpen] = React.useState(false);
+  const [message, setMessage] = React.useState('');
+  const [severity, setSeverity] = React.useState('info');
 
   const handleClickOpen = (title, hash) => {
     setIpfsHash(hash);
     setTitle(title);
-    setOpen(true);
+    setOpenPopup(true);
   };
 
 
   const handleClose = () => {
     setIpfsHash(null);
-    setOpen(false);
+    setOpenPopup(false);
   };
+
+  React.useEffect(
+    () => {
+      if (window.walletConnection.isSignedIn()) {
+        window.contract.get_projects_list()
+          .then(projectsFromContract => {
+            let foundProject;
+            projectsFromContract.forEach(projectFromContract => {
+              if (projectFromContract.code_hash === codehash) {
+                foundProject = projectFromContract;
+              }
+            });
+
+            if (!foundProject) {
+              setSeverity('error');
+              setMessage(`Unable to find project with codehash: ${codehash} !`);
+              setOpen(true);
+            } else {
+              setProject(foundProject);
+
+              window.contract.get_project_certificates({code_hash: foundProject.code_hash})
+              .then(certificatesFromContract => {
+                setCertificates(certificatesFromContract);
+              });
+            }
+          });
+      }
+    },
+    []
+  )
+
+  const Project = () => (
+    <div className="d-flex justify-content-between">
+    <div>
+      <h2 className="font-weight-bold text-black">
+        {project?.name}
+      </h2>
+      <small className="d-flex pt-2 align-items-center">
+        <a href="#/" onClick={(e) => e.preventDefault()}>
+          {project?.url}
+        </a>
+      </small>
+      <small className="d-flex pt-2 align-items-center">
+        <a href="#/" onClick={(e) => e.preventDefault()}>
+          codehash: {project?.code_hash}
+        </a>
+      </small>
+      </div>
+      <div>
+        <Button
+          variant="contained"
+          color="primary"
+          size="small"
+          className={classes.margin}
+          startIcon={<AddCircleRoundedIcon />}
+          component={Link}
+          to={'/PageSignAudit' + project?.code_hash}>
+          Audit
+      </Button>
+        <Button
+          variant="contained"
+          color="primary"
+          size="small"
+          className={classes.margin}
+          startIcon={<AddCircleRoundedIcon />}
+          component={Link}
+          to={'/PageReportAdvisory' + project?.code_hash}>
+          Advisory
+      </Button>
+      </div>
+    </div>
+  );
+
+  const ProjectAudits = () => (
+    <div className="table-responsive-md">
+    <Table className="table table-hover text-nowrap mb-0">
+      <thead>
+        <tr>
+          <th className="bg-white text-left">Auditor</th>
+          <th className="bg-white">Standards</th>
+          <th className="bg-white text-left">Signature</th>
+          <th className="bg-white text-center">Audit</th>
+          <th className="bg-white text-center">Advisory</th>
+        </tr>
+      </thead>
+      <tbody>
+      {certificates?.map((certificate, i) => (
+        <tr>
+          <td className="text-center">
+            <div className="d-flex align-items-center">
+              <div>{certificate.auditor}</div>
+            </div>
+          </td>
+          <td>
+            <div className="d-flex align-items-center">
+              <div>{certificate.standards}</div>
+            </div>
+          </td>
+          <td className="text-center">
+            <div className="d-flex align-items-center">
+              <div>{certificate.signature}</div>
+            </div>
+          </td>
+          <td className="text-center">
+            <IconButton  aria-label="view" onClick={() => {handleClickOpen('Audit', certificate.audit_hash)}}>
+              <MoreVertIcon />
+            </IconButton>
+          </td>
+          <td className="text-center">
+            <IconButton aria-label="view" hidden={certificate.advisory_hash} onClick={() => {handleClickOpen('Advisory', certificate.advisory_hash)}}>
+              <MoreVertIcon />
+            </IconButton>
+          </td>
+        </tr>
+        ))}
+      </tbody>
+    </Table>
+  </div>
+  );
 
   return (
     <>
@@ -130,11 +212,26 @@ export default function ProjectDetails() {
       </div>
       <Grid container>
         <Grid container spacing={6}>
+        <div className={classes.root}>
+            <Collapse in={open}>
+              <Alert
+                severity={severity}
+                action={
+                  <IconButton aria-label="close" color="inherit" size="small"
+                    onClick={() => { setOpen(false); }}>
+                    <CloseIcon fontSize="inherit" />
+                  </IconButton>
+                }
+              >
+                {message}
+              </Alert>
+            </Collapse>
+          </div>
           <Grid item xs>
             <Paper />
             <Dialog
               aria-labelledby="customized-dialog-title"
-              open={open}
+              open={openPopup}
             >
               <DialogTitle id="customized-dialog-title">
                 {title}
@@ -165,90 +262,9 @@ export default function ProjectDetails() {
               <div className="bg-white">
                 <PerfectScrollbar>
                   <div className="p-3">
-                  <div className="d-flex justify-content-between">
-                    <div>
-                      <h2 className="font-weight-bold text-black">
-                        {project.name}
-                      </h2>
-                      <small className="d-flex pt-2 align-items-center">
-                        <a href="#/" onClick={(e) => e.preventDefault()}>
-                          {project.url}
-                        </a>
-                      </small>
-                      <small className="d-flex pt-2 align-items-center">
-                        <a href="#/" onClick={(e) => e.preventDefault()}>
-                          codehash: {project.codehash}
-                        </a>
-                      </small>
-                      </div>
-                      <div>
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          size="small"
-                          className={classes.margin}
-                          startIcon={<AddCircleRoundedIcon />}
-                          component={Link}
-                          to={'/PageSignAudit' + project.codehash}>
-                          Audit
-                      </Button>
-                        <Button
-                          variant="contained"
-                          color="primary"
-                          size="small"
-                          className={classes.margin}
-                          startIcon={<AddCircleRoundedIcon />}
-                          component={Link}
-                          to={'/PageReportAdvisory:' + project.codehash}>
-                          Advisory
-                      </Button>
-                      </div>
-                    </div>
+                    {project ? <Project /> : ''}
                   </div>
-                  <div className="table-responsive-md">
-                    <Table className="table table-hover text-nowrap mb-0">
-                      <thead>
-                        <tr>
-                          <th className="bg-white text-left">Auditor</th>
-                          <th className="bg-white">Standards</th>
-                          <th className="bg-white text-left">Signature</th>
-                          <th className="bg-white text-center">Audit</th>
-                          <th className="bg-white text-center">Advisory</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                      {audits.map((audit, i) => (
-                        <tr>
-                          <td className="text-center">
-                            <div className="d-flex align-items-center">
-                              <div>{audit.auditor}</div>
-                            </div>
-                          </td>
-                          <td>
-                            <div className="d-flex align-items-center">
-                              <div>{audit.standards}</div>
-                            </div>
-                          </td>
-                          <td className="text-center">
-                            <div className="d-flex align-items-center">
-                              <div>{audit.signature}</div>
-                            </div>
-                          </td>
-                          <td className="text-center">
-                            <IconButton  aria-label="view" onClick={() => {handleClickOpen('Audit', audit.audit_hash)}}>
-                              <MoreVertIcon />
-                            </IconButton>
-                          </td>
-                          <td className="text-center">
-                            <IconButton aria-label="view" onClick={() => {handleClickOpen('Advisory', audit.advisory_hash)}}>
-                              <MoreVertIcon />
-                            </IconButton>
-                          </td>
-                        </tr>
-                        ))}
-                      </tbody>
-                    </Table>
-                  </div>
+                  {project ? <ProjectAudits /> : ''}
                 </PerfectScrollbar>
               </div>
             </div>
