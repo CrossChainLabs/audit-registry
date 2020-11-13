@@ -1,9 +1,11 @@
 import React, {useState} from 'react';
 import { Grid, Button, TextField, Paper } from '@material-ui/core';
 
+import IPFS from '../../ipfs'
+
 export default function SignAudit(codehash) {
   const [codeHash, set_codeHash] = useState(codehash);
-  const [auditHash, set_auditHash] = useState();
+  const [auditData, set_auditData] = useState();
   const [standards, set_standards] = useState();
   const [signature, set_signature] = useState();
 
@@ -11,7 +13,7 @@ export default function SignAudit(codehash) {
     if (window.walletConnection.isSignedIn()) {
       window.contract.sign_audit({ 
         code_hash: codeHash, 
-        audit_hash: auditHash,
+        audit_hash: auditData,
         standards: standards.split(";"),
         signature: signature
       }).then(result => {
@@ -90,8 +92,8 @@ export default function SignAudit(codehash) {
                         multiline
                         rows={10}
                         placeholder="audit findings"
-                        value={auditHash}
-                        onChange={(event) => set_auditHash(event.target.value)}
+                        value={auditData}
+                        onChange={(event) => set_auditData(event.target.value)}
                       />
                     </div>
                     <div className="text-center mb-4">

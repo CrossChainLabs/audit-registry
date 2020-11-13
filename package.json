@@ -76,8 +76,9 @@
   },
   "scripts": {
     "cleanup": "rm -rf ./out && rm -f ./neardev/dev-account && rm -rf ./contract/target/",
-    "prestart": "npm run cleanup && npm run build:contract && npm run dev:deploy:contract && npm run build:contract:name",
+    "prestart": "npm run build:contract && npm run dev:deploy:contract && npm run build:contract:name",
     "start": "env-cmd -f ./neardev/dev-account.env react-scripts start",
+    "dev": "env-cmd -f ./neardev/dev-account.env react-scripts start",
     "build": "npm run build:contract && react-scripts build",
     "build:contract": "node ./contract/build",
     "build:contract:name": "sh ./contract_name.sh",
