@@ -107,8 +107,8 @@ export default function Projects() {
                       </small>
                     </div>
                     <div>
-                      <Badge className="mx-2" badgeContent={5} max={99} color="secondary">
-                        {(project.completed || true) ?
+                      <Badge className="mx-2" badgeContent={project.versions} max={99} color="secondary">
+                        {(project.completed) ?
                           <div className="badge badge-success">Completed</div> :
                           <div className="badge badge-warning">Pending</div>
                         }

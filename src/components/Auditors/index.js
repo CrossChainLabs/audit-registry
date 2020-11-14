@@ -78,7 +78,7 @@ export default function Auditors() {
                     </div>
                     <div>
                       <div className="badge badge-info ml-3">
-                        23 audits
+                        {auditor.audits} 
                         </div>
                     </div>
                   </div>

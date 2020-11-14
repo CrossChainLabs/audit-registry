@@ -26,13 +26,15 @@ pub type Signature = String;
 #[derive(BorshDeserialize, BorshSerialize, Default, Serialize)]
 pub struct AuditorStore {
     metadata: Hash, // auditor's metadata
-    certificates:  HashMap<Hash, CertificateStore> //code_hash is the primary key
+    certificates:  HashMap<Hash, CertificateStore>, //code_hash is the primary key
+    audits: u32,
 }
 
 #[derive(BorshDeserialize, BorshSerialize, Default, Serialize)]
 pub struct Auditor {
     account_id: String,
     metadata: Hash, // auditor's metadata
+    audits: u32,
 }
 
 #[derive(BorshDeserialize, BorshSerialize, Default, Serialize)]
@@ -108,7 +110,8 @@ impl AuditRegistry {
         // insert auditor to auditors map
         self.auditors.insert(account_id, AuditorStore {
             metadata,
-            certificates: HashMap::new()
+            certificates: HashMap::new(),
+            audits: 0
         });
     }
   
@@ -153,6 +156,10 @@ impl AuditRegistry {
                     standards, 
                     advisory_hash, 
                     audit_hash }); 
+
+                    if auditor.audits < u32::MAX {
+                        auditor.audits += 1;
+                    }
             },
             None => {}
         }
@@ -189,7 +196,7 @@ impl AuditRegistry {
         let mut auditors = Vec::new();
 
         for (key, auditor) in self.auditors {
-            auditors.push(Auditor{account_id:key, metadata: auditor.metadata});
+            auditors.push(Auditor{account_id:key, metadata: auditor.metadata, audits: auditor.audits});
         }
         return auditors;
     }

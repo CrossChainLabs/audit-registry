@@ -31,20 +31,23 @@ export default function Header() {
     <>
     <div className={classes.flex}>
       <AppBar position="fixed">
-        <Toolbar disableGutters>
-          <NavLink to="/Homepage" title="Audit Registry" className="app-nav-logo flex">
-              <img
-                alt="Audit Registry"
-                className={classes.logo}
-                src={projectLogo}
-              />
+          <Toolbar disableGutters>
+            <NavLink to="/Homepage" title="Audit Registry" className="app-nav-logo flex">
+              <Toolbar disableGutters>
+                <img
+                  alt="Audit Registry"
+                  className={classes.logo}
+                  src={projectLogo}
+                />
+                <Typography className={classes.root}>
+                  Audit Registry
+            </Typography>
+              </Toolbar>
             </NavLink>
-            <Typography className={classes.root}>
-              Audit Registry
-      </Typography>
+            <div className={classes.flex} />
             <Auth />
-        </Toolbar>
-      </AppBar>
+          </Toolbar>
+        </AppBar>
       <div className={classes.toolbarMargin} />
       </div>
     </>
