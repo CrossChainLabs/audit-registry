@@ -89,12 +89,15 @@ export default function ProjectDetails(codehash) {
       if (window.walletConnection.isSignedIn()) {
         window.contract.get_projects_list()
           .then(projectsFromContract => {
+            console.log(JSON.stringify(projectsFromContract));
             let foundProject;
             projectsFromContract.forEach(projectFromContract => {
               if (projectFromContract.code_hash === codehash) {
                 foundProject = projectFromContract;
               }
             });
+
+            console.log(JSON.stringify(foundProject.code_hash));
 
             if (!foundProject) {
               setSeverity('error');
@@ -105,6 +108,7 @@ export default function ProjectDetails(codehash) {
 
               window.contract.get_project_certificates({code_hash: foundProject.code_hash})
               .then(certificatesFromContract => {
+                console.log(JSON.stringify(certificatesFromContract));
                 setCertificates(certificatesFromContract);
               });
             }

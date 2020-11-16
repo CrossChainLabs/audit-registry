@@ -5,9 +5,9 @@ import { Grid, Button, TextField, Paper} from '@material-ui/core';
 import IPFS from '../../ipfs'
 
 export default function RegisterAuditor() {
+  const accountId =  window.accountId;
   const [redirect, setRedirect] = React.useState(false);
   const [cookies, setCookie] = useCookies([
-    'auditorAccountId',
     'auditorMetadata',
     'registerAuditor'
   ]);
@@ -19,19 +19,18 @@ export default function RegisterAuditor() {
           .then(auditorsFromContract => {
             let added = false;
             auditorsFromContract.map((auditor) => {
-              if (auditor.account_id === cookies.auditorAccountId) {
+              if (auditor.account_id === accountId) {
                 added = true;
               }
             });
 
             if (added) {
-              setCookie('homeAlertMessage', `Auditor ${cookies.auditorAccountId} successfuly added !`, { path: '/' });
+              setCookie('homeAlertMessage', `Auditor ${accountId} successfuly added !`, { path: '/' });
               setCookie('homeAlertSeverity', 'success', { path: '/' });
 
-              setCookie('auditorAccountId', '', { path: '/' });
               setCookie('auditorMetadata', '', { path: '/' });
             } else {
-              setCookie('homeAlertMessage', `Unable to add auditor ${cookies.auditorAccountId} !`, { path: '/' });
+              setCookie('homeAlertMessage', `Unable to add auditor ${accountId} !`, { path: '/' });
               setCookie('homeAlertSeverity', 'error', { path: '/' });
             }
 
@@ -57,7 +56,7 @@ export default function RegisterAuditor() {
       setCookie('registerAuditor', 'true', { path: '/' });
 
       window.contract.register_auditor({
-        account_id: cookies.auditorAccountId,
+        account_id: accountId,
         metadata: metadata_hash
       }).then(result => {
           console.log('onRegisterAuditor: ' + result);
