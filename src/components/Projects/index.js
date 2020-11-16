@@ -6,6 +6,9 @@ import AddCircleRoundedIcon from '@material-ui/icons/AddCircleRounded';
 import PerfectScrollbar from 'react-perfect-scrollbar';
 import { REFRESH_INTERVAL } from '../../utils'
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faGithub } from '@fortawesome/free-brands-svg-icons'
+
 const useStyles = makeStyles((theme) => ({
   margin: {
     margin: theme.spacing(0),
@@ -101,8 +104,8 @@ export default function Projects() {
                         <Link to={'/PageProjectDetails' + project.code_hash} className="text-black">{project.name}</Link> }
                       </div>
                       <small className="d-flex pt-2 align-items-center">
-                        <a href="#/" onClick={(e) => e.preventDefault()}>
-                          codehash: {project.code_hash}
+                        <a href={project.url + '/tree/'+ project.code_hash}>
+                        <FontAwesomeIcon icon={faGithub} /> {project.code_hash}
                         </a>
                       </small>
                     </div>
