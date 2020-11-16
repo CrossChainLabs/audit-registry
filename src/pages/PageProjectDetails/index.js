@@ -3,11 +3,10 @@ import { useParams } from "react-router-dom";
 import ProjectDetails from '../../components/ProjectDetails';
 
 export default function PageProjectDetails() {
-  const { codehash } = useParams();
-
+  const { url } = useParams();
   return (
     <>
-      {ProjectDetails(codehash)}
+      {ProjectDetails(url)}
     </>
   );
 }

@@ -11,6 +11,9 @@ import MuiDialogActions from "@material-ui/core/DialogActions";
 import PerfectScrollbar from 'react-perfect-scrollbar';
 import AddCircleRoundedIcon from '@material-ui/icons/AddCircleRounded';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faGithub } from '@fortawesome/free-brands-svg-icons'
+import { decode } from 'js-base64';
 import IPFS from '../../ipfs'
 import Header from '../Header';
 
@@ -61,12 +64,13 @@ const useStyles = makeStyles((theme) => ({
 
 
 
-export default function ProjectDetails(codehash) {
+export default function ProjectDetails(base64Url) {
   const classes = useStyles();
-  const [certificates, setCertificates] = useState();
   const [openPopup, setOpenPopup] = useState(false);
+  const [url, setUrl] = useState(decode(base64Url));
   const [title, setTitle] = useState();
-  const [project, setProject] = useState();
+  const [projects, setProjects] = useState();
+  const [description, setDescription] = useState();
   const [data, setData] = React.useState();
   const [open, setOpen] = React.useState(false);
   const [message, setMessage] = React.useState('');
@@ -90,54 +94,61 @@ export default function ProjectDetails(codehash) {
     () => {
       if (window.walletConnection.isSignedIn()) {
         window.contract.get_projects_list()
-          .then(projectsFromContract => {
-            console.log(JSON.stringify(projectsFromContract));
-            let foundProject;
-            projectsFromContract.forEach(projectFromContract => {
-              if (projectFromContract.code_hash === codehash) {
-                foundProject = projectFromContract;
-              }
+          .then(async projectsFromContract => {
+            let proccesedProjects = new Array();
+
+            var projectsSlice = projectsFromContract;
+            while (projectsSlice.length) {
+              await Promise.all(projectsSlice.splice(0, 1).map(async (project) => {
+                if (project.url === url) {
+                  let certificatesFromContract = await window.contract.get_project_certificates({ code_hash: project.code_hash });
+                  let description = await IPFS.getInstance().Load(project.metadata);
+                  proccesedProjects.push({ ...project, description: description, certificates: certificatesFromContract });
+                }
+              }));
+            }
+
+            proccesedProjects.sort((a, b) => {
+              return b.index - a.index;
             });
 
-            console.log(JSON.stringify(foundProject.code_hash));
+            setProjects(proccesedProjects);
 
-            if (!foundProject) {
-              setSeverity('error');
-              setMessage(`Unable to find project with codehash: ${codehash} !`);
-              setOpen(true);
-            } else {
-              setProject(foundProject);
-
-              window.contract.get_project_certificates({code_hash: foundProject.code_hash})
-              .then(certificatesFromContract => {
-                console.log(JSON.stringify(certificatesFromContract));
-                setCertificates(certificatesFromContract);
-              });
-            }
           });
       }
     },
-    []
+    [url]
   )
 
-  const Project = () => (
+  const Project = (project) => (
     <div className="d-flex justify-content-between">
-    <div>
-      <h2 className="font-weight-bold text-black">
-        {project?.name}
-      </h2>
-      <small className="d-flex pt-2 align-items-center">
-        <a href="#/" onClick={(e) => e.preventDefault()}>
-          {project?.url}
-        </a>
-      </small>
-      <small className="d-flex pt-2 align-items-center">
-        <a href="#/" onClick={(e) => e.preventDefault()}>
-          codehash: {project?.code_hash}
-        </a>
-      </small>
-      </div>
+          <div>
+            <h2 className="font-weight-bold text-black">
+              {project?.name}
+            </h2>
+            <small className="d-flex pt-2 align-items-center">
+              <a href={project?.url}>
+                {project?.url}
+              </a>
+            </small>
+            <div/>
+            <small className="d-flex pt-2 align-items-center">
+              <a href={project.url + '/tree/' + project.code_hash}>
+                <FontAwesomeIcon icon={faGithub} /> {project.code_hash}
+              </a>
+            </small>
+            <div className="font-weight-bold"> 
+              Description
+            </div>
+            <small className="d-flex pt-2 align-items-center">
+              {project.description}
+            </small>
+          </div>
       <div>
+        {(project?.status) ?
+          <div className="badge badge-success">Completed</div> :
+          <div className="badge badge-warning">Pending</div>
+        }
         <Button
           variant="contained"
           color="primary"
@@ -162,7 +173,7 @@ export default function ProjectDetails(codehash) {
     </div>
   );
 
-  const ProjectAudits = () => (
+  const ProjectAudits = (certificates) => (
     <div className="table-responsive-md">
     <Table className="table table-hover text-nowrap mb-0">
       <thead>
@@ -175,7 +186,7 @@ export default function ProjectDetails(codehash) {
         </tr>
       </thead>
       <tbody>
-      {certificates?.map((certificate, i) => (
+      {certificates?.length ? certificates?.map((certificate, i) => (
         <tr>
           <td className="text-center">
             <div className="d-flex align-items-center">
@@ -198,13 +209,18 @@ export default function ProjectDetails(codehash) {
             </IconButton>
           </td>
           <td className="text-center">
-            <IconButton aria-label="view" disabled={certificate.advisory_hash.length == 0} onClick={() => {handleClickOpen('Advisory', certificate.advisory_hash)}}>
+            <IconButton aria-label="view" disabled={certificate.advisory_hash.length === 0} onClick={() => {handleClickOpen('Advisory', certificate.advisory_hash)}}>
               <MoreVertIcon />
             </IconButton>
           </td>
         </tr>
-        ))}
-      </tbody>
+      )) :
+            <tr>
+              <td className="text-center">
+                No audits.
+        </td>
+            </tr>}
+        </tbody>
     </Table>
   </div>
   );
@@ -258,10 +274,16 @@ export default function ProjectDetails(codehash) {
             <div className="px-3 pb-3">
               <div className="bg-white">
                 <PerfectScrollbar>
-                  <div className="p-3">
-                    {project ? <Project /> : ''}
-                  </div>
-                  {project ? <ProjectAudits /> : ''}
+                  {projects?.map((project, i) => (
+                    <div>
+                      <div className="p-3">
+                        {project ? Project(project) : ''}
+                      </div>
+                      <div>
+                        {ProjectAudits(project.certificates)}
+                      </div>
+                    </div>
+                  ))}
                 </PerfectScrollbar>
               </div>
             </div>

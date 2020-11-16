@@ -5,9 +5,9 @@ import { Badge, Button } from '@material-ui/core';
 import AddCircleRoundedIcon from '@material-ui/icons/AddCircleRounded';
 import PerfectScrollbar from 'react-perfect-scrollbar';
 import { REFRESH_INTERVAL } from '../../utils'
-
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faGithub } from '@fortawesome/free-brands-svg-icons'
+import { encode } from 'js-base64';
 
 const useStyles = makeStyles((theme) => ({
   margin: {
@@ -97,11 +97,8 @@ export default function Projects() {
                 <div>
                   <div className="d-flex justify-content-between">
                     <div>
-                      <div className="font-weight-bold">
-
-                        {(project.versions > 1) ?
-                        <Link to={'/PageProjectHistory' + project.url} className="text-black">{project.name}</Link> : 
-                        <Link to={'/PageProjectDetails' + project.code_hash} className="text-black">{project.name}</Link> }
+                      <div className="font-weight-bold"> 
+                        <Link to={'/PageProjectDetails/' + encode(project.url)} className="text-black">{project.name}</Link>
                       </div>
                       <small className="d-flex pt-2 align-items-center">
                         <a href={project.url + '/tree/'+ project.code_hash}>

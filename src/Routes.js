@@ -7,7 +7,6 @@ import PageRegisterProject from './pages/PageRegisterProject';
 import PageRegisterAuditor from './pages/PageRegisterAuditor';
 import PageReportAdvisory from './pages/PageReportAdvisory';
 import PageSignAudit from './pages/PageSignAudit';
-import PageProjectHistory from './pages/PageProjectHistory';
 import PageProjectDetails from './pages/PageProjectDetails';
 import PageAuditorDetails from './pages/PageAuditorDetails';
 import LoginPage from './pages/LoginPage';
@@ -45,8 +44,7 @@ const Routes = () => {
             '/PageRegisterAuditor',
             '/PageReportAdvisory:codehash',
             '/PageSignAudit:codehash',
-            '/PageProjectHistory:url',
-            '/PageProjectDetails:codehash',
+            '/PageProjectDetails/:url',
             '/PageAuditorDetails/:auditor/:metadata',
             '/Login'
             ]}>
@@ -56,8 +54,7 @@ const Routes = () => {
                 <Route path="/PageRegisterAuditor" component={PageRegisterAuditor}/>
                 <Route path="/PageReportAdvisory:codehash" component={PageReportAdvisory}/>
                 <Route path="/PageSignAudit:codehash" component={PageSignAudit}/>
-                <Route path="/PageProjectHistory:url" component={PageProjectHistory}/>
-                <Route path="/PageProjectDetails:codehash" component={PageProjectDetails}/>
+                <Route path="/PageProjectDetails/:url" component={PageProjectDetails}/>
                 <Route path="/PageAuditorDetails/:auditor/:metadata" component={PageAuditorDetails}/>
                 <Route path="/Login" component={LoginPage}/>
             </Switch>
