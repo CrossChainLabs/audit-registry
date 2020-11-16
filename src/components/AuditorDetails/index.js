@@ -9,13 +9,14 @@ import IPFS from '../../ipfs'
 
 export default function AuditorDetails(auditor, metadata) {
   const [data, setData] = React.useState();
-  React.useEffect(
-    async () => {
+
+  React.useEffect(() => {
+    async function fetchData() {
       let ipfsData = await IPFS.getInstance().Load(metadata);
       setData(ipfsData);
-    },
-    []
-  )
+    }
+    fetchData();
+  }, [metadata]); // Or [] if effect doesn't need props or state
 
   return (
     <>
