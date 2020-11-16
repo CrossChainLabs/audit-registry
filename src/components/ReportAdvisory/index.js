@@ -35,9 +35,6 @@ export default function ReportAdvisory(codehash) {
           .then(certificatesFromContract => {
             let added = false;
             certificatesFromContract.forEach(certificateFromContract => {
-              console.log(JSON.stringify(certificateFromContract));
-              console.log('codehash: ' + codehash);
-              console.log('advisory_hash: ' + cookies.advisory_hash);
               if ((certificateFromContract.code_hash === codehash) &&
                  (certificateFromContract.advisory_hash === cookies.advisory_hash))
               {

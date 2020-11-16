@@ -47,7 +47,7 @@ const Routes = () => {
             '/PageSignAudit:codehash',
             '/PageProjectHistory:url',
             '/PageProjectDetails:codehash',
-            '/PageAuditorDetails',
+            '/PageAuditorDetails/:auditor/:metadata',
             '/Login'
             ]}>
             <Switch location={location} key={location.pathname}>
@@ -58,7 +58,7 @@ const Routes = () => {
                 <Route path="/PageSignAudit:codehash" component={PageSignAudit}/>
                 <Route path="/PageProjectHistory:url" component={PageProjectHistory}/>
                 <Route path="/PageProjectDetails:codehash" component={PageProjectDetails}/>
-                <Route path="/PageAuditorDetails" component={PageAuditorDetails}/>
+                <Route path="/PageAuditorDetails/:auditor/:metadata" component={PageAuditorDetails}/>
                 <Route path="/Login" component={LoginPage}/>
             </Switch>
           </Route>

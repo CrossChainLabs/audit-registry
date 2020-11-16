@@ -79,7 +79,7 @@ export default function Auditors() {
                     <div>
                       <div className="font-weight-bold">
                         <Link
-                          to='/PageAuditorDetails'
+                          to={'/PageAuditorDetails/' + auditor.account_id + '/' + auditor.metadata}
                           className="text-black">
                           {auditor.account_id}
                         </Link>

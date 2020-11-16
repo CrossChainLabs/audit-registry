@@ -11,7 +11,7 @@ import MuiDialogActions from "@material-ui/core/DialogActions";
 import PerfectScrollbar from 'react-perfect-scrollbar';
 import AddCircleRoundedIcon from '@material-ui/icons/AddCircleRounded';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
-
+import IPFS from '../../ipfs'
 import Header from '../Header';
 
 const styles = (theme) => ({
@@ -67,20 +67,22 @@ export default function ProjectDetails(codehash) {
   const [openPopup, setOpenPopup] = useState(false);
   const [title, setTitle] = useState();
   const [project, setProject] = useState();
-  const [ipfsHash, setIpfsHash] = useState(null);
+  const [data, setData] = React.useState();
   const [open, setOpen] = React.useState(false);
   const [message, setMessage] = React.useState('');
   const [severity, setSeverity] = React.useState('info');
 
-  const handleClickOpen = (title, hash) => {
-    setIpfsHash(hash);
+  const handleClickOpen = async (title, hash) => {
+    if (!hash) return;
+
     setTitle(title);
     setOpenPopup(true);
+    let ipfsData = await IPFS.getInstance().Load(hash);
+    setData(ipfsData);
   };
 
 
   const handleClose = () => {
-    setIpfsHash(null);
     setOpenPopup(false);
   };
 
@@ -196,7 +198,7 @@ export default function ProjectDetails(codehash) {
             </IconButton>
           </td>
           <td className="text-center">
-            <IconButton aria-label="view" hidden={certificate.advisory_hash} onClick={() => {handleClickOpen('Advisory', certificate.advisory_hash)}}>
+            <IconButton aria-label="view" disabled={certificate.advisory_hash.length == 0} onClick={() => {handleClickOpen('Advisory', certificate.advisory_hash)}}>
               <MoreVertIcon />
             </IconButton>
           </td>
@@ -242,7 +244,7 @@ export default function ProjectDetails(codehash) {
               </DialogTitle>
               <DialogContent dividers>
                 <Typography gutterBottom>
-                  {ipfsHash} 
+                  {data} 
               </Typography>
               </DialogContent>
               <DialogActions>

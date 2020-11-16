@@ -15,7 +15,6 @@ use near_sdk::{env, near_bindgen, wee_alloc, AccountId};
 use std::collections::HashMap;
 use borsh::{BorshDeserialize, BorshSerialize};
 use serde::Serialize;
-use log::{info};
 
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
@@ -97,15 +96,15 @@ impl AuditRegistry {
     pub fn register_auditor(&mut self, account_id: AccountId, metadata: Hash) {
         // check that the logged in account_id is the same with the provided one
         let current_account_id = env::predecessor_account_id();
-        info!("Register_auditor: {}", current_account_id);
+        env::log(format!("Register_auditor: {}", current_account_id).as_bytes());
         if account_id.ne(&current_account_id) {
-            info!("Current register auditor not equal to: {}", account_id);
+            env::log(format!("Current register auditor not equal to: {}", account_id).as_bytes());
             return;
         }
 
         //check if code_hash already exists
         if self.auditors.contains_key(&account_id) {
-            info!("Register_auditor already signed");
+            env::log(format!("Register_auditor already signed").as_bytes());
             return;
         }
 
@@ -114,7 +113,7 @@ impl AuditRegistry {
             metadata,
             certificates: HashMap::new()
         });
-        info!("Register_auditor completed");
+        env::log(format!("Register_auditor completed").as_bytes());
     }
   
     /// Adding project to the registry. Code hash is used as primary key for certificate information.
@@ -143,20 +142,20 @@ impl AuditRegistry {
     pub fn sign_audit(&mut self, code_hash: Hash, audit_hash: Hash, standards: Vec<String>, signature: Signature) {
         // get current account_id
         let current_account_id = env::predecessor_account_id();
-        info!("sign_audit code_hash: {}", code_hash);
+        env::log(format!("sign_audit code_hash: {}", code_hash).as_bytes());
 
         //find auditor
         match self.auditors.get_mut(&current_account_id) {
             Some(auditor) => {
                 if auditor.certificates.contains_key(&code_hash) {
-                    info!("sign_audit auditor already signed");
+                    env::log(format!("sign_audit auditor already signed").as_bytes());
                     return;
                 }
 
-                info!("sign_audit auditor: {}", current_account_id);
+                env::log(format!("sign_audit auditor: {}", current_account_id).as_bytes());
                 match self.projects.get_mut(&code_hash) {
                     Some(project) => {
-                        info!("sign_audit project.status: {}", project.status);
+                        env::log(format!("sign_audit project.status: {}", project.status).as_bytes());
                         project.status = true; //true = completed
                     },
                     None => {}
@@ -169,7 +168,7 @@ impl AuditRegistry {
                     standards, 
                     advisory_hash, 
                     audit_hash });
-                info!("sign_audit completed");  
+                env::log(format!("sign_audit completed").as_bytes());
             },
             None => {}
         }
@@ -185,14 +184,16 @@ impl AuditRegistry {
          //find auditor
          match self.auditors.get_mut(&current_account_id) {
             Some(auditor_store) => {
-                if auditor_store.certificates.contains_key(&code_hash) {
+                if !auditor_store.certificates.contains_key(&code_hash) {
                     return;
                 }
 
                 // add advisory_hash to certificate
                 match auditor_store.certificates.get_mut(&code_hash) {
                 Some(certificate_store) => {   
+                    env::log(format!("advisory_hash: {}", advisory_hash).as_bytes());
                     certificate_store.advisory_hash = advisory_hash;
+                    env::log(format!("certificate_store.advisory_hash: {}", certificate_store.advisory_hash).as_bytes());
                 },
                 None => {}
                 }
