@@ -133,7 +133,7 @@ export default function ReportAdvisory(codehash) {
                         fullWidth
                         placeholder="code hash"
                         value={codeHash}
-                        onChange={(event) => set_codeHash(event.target.value)}
+                        disabled
                       />
                     </div>
                     <div className="mb-3">

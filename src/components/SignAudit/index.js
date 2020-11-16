@@ -37,6 +37,9 @@ export default function SignAudit(codehash) {
           .then(certificatesFromContract => {
             let added = false;
             certificatesFromContract.forEach(certificateFromContract => {
+              console.log(certificateFromContract)
+              console.log(codehash);
+              console.log(cookies.audit_hash);
               if ((certificateFromContract.code_hash === codehash) &&
                  (certificateFromContract.audit_hash === cookies.audit_hash))
               {
@@ -137,7 +140,7 @@ export default function SignAudit(codehash) {
                         fullWidth
                         placeholder="code hash"
                         value={codeHash}
-                        onChange={(event) => set_codeHash(event.target.value)}
+                        disabled
                       />
                     </div>
                     <div className="mb-3">

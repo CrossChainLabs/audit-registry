@@ -19,12 +19,20 @@ const useStyles = makeStyles((theme) => ({
 
 export default function Auditors() {
   const classes = useStyles();
+  const [disableRegisterAuditor, setDisableRegisterAuditor] = React.useState(false);
   const [auditors, set_auditors] = useState();
 
   const getAuditors = () => {
     if (window.walletConnection.isSignedIn()) {
       window.contract.get_auditors_list()
         .then(auditorsFromContract => {
+          auditorsFromContract.forEach(auditor => {
+            console.log(auditorsFromContract);
+            console.log(window.accountId);
+            if (auditor.account_id == window.accountId) {
+              setDisableRegisterAuditor(true);
+            }
+          });
           set_auditors(auditorsFromContract)
         })
     }
@@ -56,6 +64,7 @@ export default function Auditors() {
                   variant="contained"
                   color="primary"
                   size="small"
+                  disabled = {disableRegisterAuditor}
                   className={classes.margin}
                   startIcon={<AddCircleRoundedIcon />}
                   component={Link} 
@@ -77,9 +86,7 @@ export default function Auditors() {
                       </div>
                     </div>
                     <div>
-                      <div className="badge badge-info ml-3">
-                        {auditor.audits} 
-                        </div>
+
                     </div>
                   </div>
                   { (i < auditors.length - 1) ?

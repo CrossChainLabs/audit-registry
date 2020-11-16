@@ -1,26 +1,11 @@
 import React, {useState} from 'react';
+import { Redirect } from "react-router-dom";
 import { useCookies } from 'react-cookie';
-import { makeStyles } from '@material-ui/core/styles';
-import { Grid, Button, TextField, Paper, Collapse, IconButton } from '@material-ui/core';
-import CloseIcon from '@material-ui/icons/Close';
-import Alert from '@material-ui/lab/Alert';
-
+import { Grid, Button, TextField, Paper} from '@material-ui/core';
 import IPFS from '../../ipfs'
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    width: '100%',
-    '& > * + *': {
-      marginTop: theme.spacing(2),
-    },
-  },
-}));
-
 export default function RegisterAuditor() {
-  const classes = useStyles();
-  const [open, setOpen] = React.useState(false);
-  const [message, setMessage] = React.useState('');
-  const [severity, setSeverity] = React.useState('info');
+  const [redirect, setRedirect] = React.useState(false);
   const [cookies, setCookie] = useCookies([
     'auditorAccountId',
     'auditorMetadata',
@@ -40,18 +25,18 @@ export default function RegisterAuditor() {
             });
 
             if (added) {
-              setSeverity('success');
-              setMessage(`Auditor ${cookies.auditorAccountId} successfuly added !`);
+              setCookie('homeAlertMessage', `Auditor ${cookies.auditorAccountId} successfuly added !`, { path: '/' });
+              setCookie('homeAlertSeverity', 'success', { path: '/' });
 
               setCookie('auditorAccountId', '', { path: '/' });
               setCookie('auditorMetadata', '', { path: '/' });
             } else {
-              setSeverity('error');
-              setMessage(`Unable to add auditor ${cookies.auditorAccountId} !`);
+              setCookie('homeAlertMessage', `Unable to add auditor ${cookies.auditorAccountId} !`, { path: '/' });
+              setCookie('homeAlertSeverity', 'error', { path: '/' });
             }
 
             setCookie('registerAuditor', 'false', { path: '/' });
-            setOpen(true);
+            setRedirect(true);
           })
       }
     },
@@ -64,10 +49,8 @@ export default function RegisterAuditor() {
 
       if (!metadata_hash) {
         //Unable to save metadata on IPFS'
-        setSeverity('error');
-        setMessage('Unable to save metadata on IPFS !');
-        setOpen(true);
-
+        setCookie('homeAlertMessage', `Unable to save metadata on IPFS !`, { path: '/' });
+        setCookie('homeAlertSeverity', 'error', { path: '/' });
         return;
       }
 
@@ -82,25 +65,14 @@ export default function RegisterAuditor() {
     }
   }
 
+  if (redirect) {
+    return <Redirect to='Homepage' />
+  }
+
   return (
     <>
       <div className="app-wrapper bg-white min-vh-100">
         <Grid container spacing={3}>
-          <div className={classes.root}>
-            <Collapse in={open}>
-              <Alert
-                severity={severity}
-                action={
-                  <IconButton aria-label="close" color="inherit" size="small"
-                    onClick={() => { setOpen(false); }}>
-                    <CloseIcon fontSize="inherit" />
-                  </IconButton>
-                }
-              >
-                {message}
-              </Alert>
-            </Collapse>
-          </div>
           <Grid item xs>
             <Paper />
           </Grid>
@@ -126,8 +98,8 @@ export default function RegisterAuditor() {
                         size="small"
                         fullWidth
                         placeholder="account id"
-                        value={cookies.auditorAccountId}
-                        onChange={(event) => setCookie('auditorAccountId', event.target.value, { path: '/' })}
+                        value= {window.accountId}
+                        disabled
                       />
                     </div>
                     <div className="mb-3">
