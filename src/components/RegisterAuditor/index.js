@@ -8,13 +8,31 @@ export default function RegisterAuditor() {
   const accountId =  window.accountId;
   const [redirect, setRedirect] = React.useState(false);
   const [cookies, setCookie] = useCookies([
-    'auditorMetadata',
-    'registerAuditor'
+    'auditorMetadata'
   ]);
 
-  React.useEffect(
-    () => {
-      if (window.walletConnection.isSignedIn() && cookies.registerAuditor === 'true') {
+  const alert = (severity, msg) => {
+    window.homepage = {
+      alert: {
+        msg: msg,
+        severity: severity
+      }
+    }
+  };
+  
+  const onRegisterAuditor = async () => {
+    if (window.walletConnection.isSignedIn()) {
+      let metadata_hash = await IPFS.getInstance().Save(cookies.auditorMetadata);
+
+      if (!metadata_hash) {
+        alert('error', `Unable to save metadata on IPFS !`, { path: '/' });
+        return;
+      }
+
+      window.contract.register_auditor({
+        account_id: accountId,
+        metadata: metadata_hash
+      }).then(result => {
         window.contract.get_auditors_list()
           .then(auditorsFromContract => {
             let added = false;
@@ -25,42 +43,15 @@ export default function RegisterAuditor() {
             });
 
             if (added) {
-              setCookie('homeAlertMessage', `Auditor ${accountId} successfuly added !`, { path: '/' });
-              setCookie('homeAlertSeverity', 'success', { path: '/' });
-
+              alert('success', `Auditor ${accountId} successfuly added !`, { path: '/' });
               setCookie('auditorMetadata', '', { path: '/' });
             } else {
-              setCookie('homeAlertMessage', `Unable to add auditor ${accountId} !`, { path: '/' });
-              setCookie('homeAlertSeverity', 'error', { path: '/' });
+              alert('error', `Unable to add auditor ${accountId} !`, { path: '/' });
             }
 
-            setCookie('registerAuditor', 'false', { path: '/' });
             setRedirect(true);
           })
-      }
-    },
-    []
-  )
-  
-  const onRegisterAuditor = async () => {
-    if (window.walletConnection.isSignedIn()) {
-      let metadata_hash = await IPFS.getInstance().Save(cookies.auditorMetadata);
-
-      if (!metadata_hash) {
-        //Unable to save metadata on IPFS'
-        setCookie('homeAlertMessage', `Unable to save metadata on IPFS !`, { path: '/' });
-        setCookie('homeAlertSeverity', 'error', { path: '/' });
-        return;
-      }
-
-      setCookie('registerAuditor', 'true', { path: '/' });
-
-      window.contract.register_auditor({
-        account_id: accountId,
-        metadata: metadata_hash
-      }).then(result => {
-          console.log('onRegisterAuditor: ' + result);
-        })
+      })
     }
   }
 

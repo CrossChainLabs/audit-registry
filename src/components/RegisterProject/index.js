@@ -9,11 +9,10 @@ export default function RegisterProject() {
   const [cookies, setCookie] = useCookies(['projectName',
     'projectUrl',
     'projectMetadata',
-    'projectCodeHash',
-    'registerProject']);
+    'projectCodeHash']);
 
     const alert = (severity, msg) => {
-      window.pageProjectDetails = {
+      window.homepage = {
         alert: {
           msg: msg,
           severity: severity
@@ -21,9 +20,21 @@ export default function RegisterProject() {
       }
     };
 
-  React.useEffect(
-    () => {
-      if (window.walletConnection.isSignedIn() && cookies.registerProject === 'true') {
+  const onSubmit = async () => {
+    if (window.walletConnection.isSignedIn()) {
+      let metadata_hash = await IPFS.getInstance().Save(cookies.projectMetadata);
+
+      if (!metadata_hash) {
+        alert('error', `Unable to save metadata on IPFS !`, { path: '/' });
+        return;
+      }
+
+      window.contract.register_project({ 
+        name: cookies.projectName, 
+        url: cookies.projectUrl,
+        metadata: metadata_hash,
+        code_hash: cookies.projectCodeHash
+      }).then(result => {
         window.contract.get_projects_list()
           .then(projectsFromContract => {
             let added = false;
@@ -44,32 +55,8 @@ export default function RegisterProject() {
               alert('error', `Unable to add project ${cookies.projectName} !`, { path: '/' });
             }
 
-            setCookie('registerProject', 'false', { path: '/' });
             setRedirect(true);
           })
-      }
-    },
-    []
-  )
-
-  const onSubmit = async () => {
-    if (window.walletConnection.isSignedIn()) {
-      let metadata_hash = await IPFS.getInstance().Save(cookies.projectMetadata);
-
-      if (!metadata_hash) {
-        alert('error', `Unable to save metadata on IPFS !`, { path: '/' });
-        return;
-      }
-
-      setCookie('registerProject', 'true', { path: '/' });
-
-      window.contract.register_project({ 
-        name: cookies.projectName, 
-        url: cookies.projectUrl,
-        metadata: metadata_hash,
-        code_hash: cookies.projectCodeHash
-      }).then(result => {
-        setRedirect(true);
       })
     }
   }

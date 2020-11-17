@@ -1,12 +1,8 @@
 import React from 'react';
-import { Redirect } from "react-router-dom";
-import { useCookies } from 'react-cookie';
 import { makeStyles } from '@material-ui/core/styles';
-import { Grid, Button, TextField, Paper, Collapse, IconButton } from '@material-ui/core';
+import { Grid, Paper, Collapse, IconButton } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import Alert from '@material-ui/lab/Alert';
-
-import Header from '../Header';
 import Auditors from '../Auditors';
 import Projects from '../Projects';
 
@@ -24,29 +20,21 @@ export default function Home() {
   const [open, setOpen] = React.useState(false);
   const [message, setMessage] = React.useState('');
   const [severity, setSeverity] = React.useState('info');
-  const [cookies, setCookie] = useCookies([
-    'homeAlertMessage',
-    'homeAlertSeverity']);
+
+  console.log('home: ');
 
   React.useEffect(
     () => {
-      if (cookies.homeAlertMessage && cookies.homeAlertSeverity) {
-        setMessage(cookies.homeAlertMessage);
-        setSeverity(cookies.homeAlertSeverity);
-        setOpen(true);
-        setCookie('homeAlertMessage', '', { path: '/' });
-        setCookie('homeAlertSeverity', '', { path: '/' });
-      }
-
-      if (window.pageProjectDetails) {
-        setSeverity(window.pageProjectDetails?.alert?.severity);
-        setMessage(window.pageProjectDetails?.alert?.msg);
+      console.log('home: useEffect');
+      if (window.homepage) {
+        setSeverity(window.homepage?.alert?.severity);
+        setMessage(window.homepage?.alert?.msg);
         setOpen(true);
         
-        window.pageProjectDetails = null;
+        window.homepage = null;
       }
     },
-    []
+    [window.homepage]
   )
 
   return (
