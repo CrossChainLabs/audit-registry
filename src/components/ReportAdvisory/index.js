@@ -2,18 +2,16 @@ import React, {useState} from 'react';
 import { useCookies } from 'react-cookie';
 import { makeStyles } from '@material-ui/core/styles';
 import { Grid, Button, TextField, Paper, Collapse, IconButton } from '@material-ui/core';
-import CloseIcon from '@material-ui/icons/Close';
-import Alert from '@material-ui/lab/Alert';
+import Backdrop from '@material-ui/core/Backdrop';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import { Redirect } from "react-router-dom";
 
 import IPFS from '../../ipfs'
 
 const useStyles = makeStyles((theme) => ({
-  root: {
-    width: '100%',
-    '& > * + *': {
-      marginTop: theme.spacing(2),
-    },
+  backdrop: {
+    zIndex: theme.zIndex.drawer + 1,
+    color: '#fff',
   },
 }));
 
@@ -25,9 +23,7 @@ export default function ReportAdvisory(codehash, url) {
   const [message, setMessage] = React.useState('');
   const [severity, setSeverity] = React.useState('info');
   const [cookies, setCookie] = useCookies([
-    'reportAdvisory',
-    'advisoryData',
-    'advisory_hash'
+    'advisoryData'
   ]);
 
   const alert = (severity, msg) => {
@@ -38,40 +34,10 @@ export default function ReportAdvisory(codehash, url) {
       }
     }
   };
-
-  React.useEffect(
-    () => {
-      if (window.walletConnection.isSignedIn() && cookies.reportAdvisory === 'true') {
-        window.contract.get_project_certificates({ code_hash: codehash })
-          .then(certificatesFromContract => {
-            let added = false;
-            certificatesFromContract.forEach(certificateFromContract => {
-              if ((certificateFromContract.code_hash === codehash) &&
-                 (certificateFromContract.advisory_hash === cookies.advisory_hash))
-              {
-                added = true;
-              }
-            });
-
-            if (added) {
-              alert('success', `Advisory for codehash ${codehash} successfuly added !`);
-
-              setCookie('advisoryData', '', { path: '/' });
-              setCookie('advisory_hash', '', { path: '/' });
-            } else {
-              alert('error', `Unable to add advisory for codehash ${codehash} !`);
-            }
-
-            setCookie('reportAdvisory', 'false', { path: '/' });
-          })
-      }
-    },
-    [redirect]
-  )
-
   
   const onAdvisoryReport = async () => {
     if (window.walletConnection.isSignedIn()) {
+      setOpen(true);
       let advisory_hash = await IPFS.getInstance().Save(cookies.advisoryData);
 
       if (!advisory_hash) {
@@ -79,12 +45,31 @@ export default function ReportAdvisory(codehash, url) {
         return;
       }
 
-      setCookie('reportAdvisory', 'true', { path: '/' });
-      setCookie('advisory_hash', advisory_hash, { path: '/' });
-
       window.contract.report_advisory({ code_hash: codehash, advisory_hash: advisory_hash })
         .then(result => {
-          setRedirect(true);
+          window.contract.get_project_certificates({ code_hash: codehash })
+          .then(certificatesFromContract => {
+            let added = false;
+            certificatesFromContract.forEach(certificateFromContract => {
+              if ((certificateFromContract.code_hash === codehash) &&
+                 (certificateFromContract.advisory_hash === advisory_hash))
+              {
+                added = true;
+              }
+            });
+
+            setOpen(false);
+
+            if (added) {
+              alert('success', `Advisory for codehash: ${codehash} successfuly added !`);
+
+              setCookie('advisoryData', '', { path: '/' });
+            } else {
+              alert('error', `Unable to add advisory for codehash ${codehash} !`);
+            }
+
+            setRedirect(true);
+          })
         });
     }
   }
@@ -97,21 +82,6 @@ export default function ReportAdvisory(codehash, url) {
     <>
       <div className="app-wrapper bg-white min-vh-100">
         <Grid container spacing={3}>
-        <div className={classes.root}>
-            <Collapse in={open}>
-              <Alert
-                severity={severity}
-                action={
-                  <IconButton aria-label="close" color="inherit" size="small"
-                    onClick={() => { setOpen(false); }}>
-                    <CloseIcon fontSize="inherit" />
-                  </IconButton>
-                }
-              >
-                {message}
-              </Alert>
-            </Collapse>
-          </div>
           <Grid item xs>
             <Paper />
           </Grid>
@@ -170,6 +140,9 @@ export default function ReportAdvisory(codehash, url) {
                   </div>
                 </div>
               </div>
+              <Backdrop className={classes.backdrop} open={open}>
+                <CircularProgress color="inherit" />
+              </Backdrop>
             </Grid>
             <Grid item xs>
               <Paper />

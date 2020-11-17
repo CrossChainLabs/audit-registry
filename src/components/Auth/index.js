@@ -12,6 +12,7 @@ import Popper from "@material-ui/core/Popper";
 import MenuItem from "@material-ui/core/MenuItem";
 import MenuList from "@material-ui/core/MenuList";
 import Typography from "@material-ui/core/Typography";
+import ExitToAppOutlinedIcon from '@material-ui/icons/ExitToAppOutlined';
 
 import { logout } from '../../utils'
 
@@ -30,26 +31,6 @@ const Auth = (props) => {
     return <Redirect to="/Login" />
   }
 
-  const [open, setOpen] = React.useState(false);
-  const anchorRef = React.useRef(null);
-
-  const handleMenuItemClick = (event) => {
-    onLogout()
-    setOpen(false);
-  };
-
-  const handleToggle = () => {
-    setOpen((prevOpen) => !prevOpen);
-  };
-
-  const handleClose = (event) => {
-    if (anchorRef.current && anchorRef.current.contains(event.target)) {
-      return;
-    }
-
-    setOpen(false);
-  };
-
   return (
     <>
       <Typography className={classes.root}>
@@ -57,47 +38,14 @@ const Auth = (props) => {
       </Typography>
       <Button
         className={classes.root}
-        ref={anchorRef}
+        hidden={window.walletConnection.isSignedIn() === false}
         variant="text"
         size="small"
-        aria-controls={open ? "split-button-menu" : undefined}
-        aria-expanded={open ? "true" : undefined}
-        aria-label="select merge strategy"
-        aria-haspopup="menu"
-        onClick={handleToggle}
+        onClick={() => onLogout()}
       >
-        <ArrowDropDownIcon />
+        <ExitToAppOutlinedIcon />
       </Button>
-      <Popper
-        open={open}
-        anchorEl={anchorRef.current}
-        role={undefined}
-        transition
-        disablePortal
-      >
-        {({ TransitionProps, placement }) => (
-          <Grow
-            {...TransitionProps}
-            style={{
-              transformOrigin:
-                placement === "bottom" ? "center top" : "center bottom"
-            }}
-          >
-            <Paper>
-              <ClickAwayListener onClickAway={handleClose}>
-                <MenuList id="split-button-menu">
-                  <MenuItem
-                    key="Logout"
-                    onClick={(event) => handleMenuItemClick(event)}
-                  >
-                    Logout
-                  </MenuItem>
-                </MenuList>
-              </ClickAwayListener>
-            </Paper>
-          </Grow>
-        )}
-      </Popper>
+
     </>
   )
 }

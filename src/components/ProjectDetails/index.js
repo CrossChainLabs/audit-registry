@@ -46,7 +46,6 @@ const DialogActions = withStyles((theme) => ({
   }
 }))(MuiDialogActions);
 
-
 const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
@@ -59,6 +58,12 @@ const useStyles = makeStyles((theme) => ({
   },
   extendedIcon: {
     marginRight: theme.spacing(1),
+  },
+  dialogPaper: {
+    minHeight: '80vh',
+    maxHeight: '80vh',
+    minWidth: '80vh',
+    maxWidth: '80vh',
   },
 }));
 
@@ -119,7 +124,7 @@ export default function ProjectDetails(base64Url) {
               setSeverity(window.pageProjectDetails?.alert?.severity);
               setMessage(window.pageProjectDetails?.alert?.msg);
               setOpen(true);
-              
+
               window.pageProjectDetails = null;
             }
 
@@ -165,6 +170,7 @@ export default function ProjectDetails(base64Url) {
           className={classes.margin}
           startIcon={<AddCircleRoundedIcon />}
           component={Link}
+          disabled={window.isAuditor === false}
           to={'/PageSignAudit/' + project?.code_hash + '/' + encode(project?.url)}>
           Audit
       </Button>
@@ -175,6 +181,7 @@ export default function ProjectDetails(base64Url) {
           className={classes.margin}
           startIcon={<AddCircleRoundedIcon />}
           component={Link}
+          disabled={window.isAuditor === false}
           to={'/PageReportAdvisory/' + project?.code_hash + '/' + encode(project?.url)}>
           Advisory
       </Button>
@@ -247,6 +254,7 @@ export default function ProjectDetails(base64Url) {
             <Collapse in={open}>
               <Alert
                 severity={severity}
+                style={{width: '98%', marginLeft: '1%'}}//, marginTop: '-0.5%'
                 action={
                   <IconButton aria-label="close" color="inherit" size="small"
                     onClick={() => { setOpen(false); }}>
@@ -261,6 +269,7 @@ export default function ProjectDetails(base64Url) {
           <Grid item xs>
             <Paper />
             <Dialog
+            classes={{ paper: classes.dialogPaper }}
               aria-labelledby="customized-dialog-title"
               open={openPopup}
             >

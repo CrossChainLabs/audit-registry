@@ -3,10 +3,21 @@ import { Redirect } from "react-router-dom";
 import { useCookies } from 'react-cookie';
 import { Grid, Button, TextField, Paper} from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
+import Backdrop from '@material-ui/core/Backdrop';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import IPFS from '../../ipfs'
+
+const useStyles = makeStyles((theme) => ({
+  backdrop: {
+    zIndex: theme.zIndex.drawer + 1,
+    color: '#fff',
+  },
+}));
 
 export default function RegisterAuditor() {
   const accountId =  window.accountId;
+  const classes = useStyles();
+  const [open, setOpen] = React.useState(false);
   const [redirect, setRedirect] = React.useState(false);
   const [cookies, setCookie] = useCookies([
     'auditorMetadata'
@@ -23,6 +34,7 @@ export default function RegisterAuditor() {
   
   const onRegisterAuditor = async () => {
     if (window.walletConnection.isSignedIn()) {
+      setOpen(true);
       let metadata_hash = await IPFS.getInstance().Save(cookies.auditorMetadata);
 
       if (!metadata_hash) {
@@ -43,6 +55,8 @@ export default function RegisterAuditor() {
               }
             });
 
+            setOpen(false);
+
             if (added) {
               alert('success', `Auditor ${accountId} successfuly added !`, { path: '/' });
               setCookie('auditorMetadata', '', { path: '/' });
@@ -55,17 +69,6 @@ export default function RegisterAuditor() {
       })
     }
   }
-
-  const useStyles = makeStyles((theme) => ({
-    margin: {
-      margin: theme.spacing(0),
-      marginBottom: theme.spacing(2),
-    },
-    extendedIcon: {
-      marginRight: theme.spacing(1),
-    },
-  }));
-  const classes = useStyles();
 
   if (redirect) {
     return <Redirect to='Homepage' />
@@ -142,6 +145,9 @@ export default function RegisterAuditor() {
             <Paper />
           </Grid>
         </Grid>
+        <Backdrop className={classes.backdrop} open={open}>
+          <CircularProgress color="inherit" />
+        </Backdrop>
       </div>
     </>
   );
