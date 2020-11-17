@@ -194,8 +194,12 @@ export default function SignAudit(codehash, url) {
                       />
                     </div>
                     <div className="text-center mb-4">
-                      <Button className="btn-primary text-uppercase font-weight-bold font-size-sm my-3"
-                              onClick={onSign}>
+                      <Button 
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        className={classes.margin}
+                        onClick={onSign}>
                         Sign
                       </Button>
                     </div>

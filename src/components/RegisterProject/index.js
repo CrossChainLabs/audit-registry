@@ -2,6 +2,7 @@ import React, {useState} from 'react';
 import { Redirect } from "react-router-dom";
 import { useCookies } from 'react-cookie';
 import { Grid, Button, TextField, Paper } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
 import IPFS from '../../ipfs'
 
 export default function RegisterProject() {
@@ -11,14 +12,25 @@ export default function RegisterProject() {
     'projectMetadata',
     'projectCodeHash']);
 
-    const alert = (severity, msg) => {
-      window.homepage = {
-        alert: {
-          msg: msg,
-          severity: severity
-        }
+  const alert = (severity, msg) => {
+    window.homepage = {
+      alert: {
+        msg: msg,
+        severity: severity
       }
-    };
+    }
+  };
+  
+  const useStyles = makeStyles((theme) => ({
+    margin: {
+      margin: theme.spacing(0),
+      marginBottom: theme.spacing(2),
+    },
+    extendedIcon: {
+      marginRight: theme.spacing(1),
+    },
+  }));
+  const classes = useStyles();
 
   const onSubmit = async () => {
     if (window.walletConnection.isSignedIn()) {
@@ -140,8 +152,12 @@ export default function RegisterProject() {
                       />
                     </div>
                     <div className="text-center mb-4">
-                      <Button className="btn-primary text-uppercase font-weight-bold font-size-sm my-3"
-                              onClick={onSubmit}>
+                      <Button 
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        className={classes.margin}
+                        onClick={onSubmit}>
                         Submit
                       </Button>
                     </div>

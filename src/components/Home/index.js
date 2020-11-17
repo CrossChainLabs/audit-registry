@@ -44,7 +44,7 @@ export default function Home() {
           <div className={classes.alert}>
             <Collapse in={open}>
               <Alert
-                style={{width: '98%', marginLeft: '1%'}}//, marginTop: '-0.5%'
+                style={{width: '98%', marginLeft: '1%'}}
                 severity={severity}
                 action={
                   <IconButton aria-label="close" color="inherit" size="small"

@@ -52,8 +52,8 @@ const Auth = (props) => {
 
   return (
     <>
-     <Typography className={classes.root}>
-       {window.accountId}
+      <Typography className={classes.root}>
+        {window.accountId}
       </Typography>
       <Button
         className={classes.root}

@@ -158,8 +158,12 @@ export default function ReportAdvisory(codehash, url) {
                     </div>
 
                     <div className="text-center mb-4">
-                      <Button className="btn-primary text-uppercase font-weight-bold font-size-sm my-3"
-                              onClick={onAdvisoryReport}>
+                      <Button 
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        className={classes.margin}
+                        onClick={onAdvisoryReport}>
                         Report
                       </Button>
                     </div>

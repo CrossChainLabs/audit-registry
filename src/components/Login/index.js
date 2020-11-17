@@ -1,10 +1,21 @@
 import React from 'react';
-
+import { makeStyles } from '@material-ui/core/styles';
 import { Grid, Button, Paper } from '@material-ui/core';
 
 import { login } from '../../utils'
 
+const useStyles = makeStyles((theme) => ({
+  margin: {
+    margin: theme.spacing(0),
+    marginBottom: theme.spacing(2),
+  },
+  extendedIcon: {
+    marginRight: theme.spacing(1),
+  },
+}));
+
 export default function Login() {
+  const classes = useStyles();
   return (
     <>
       <div className="app-wrapper bg-white min-vh-100">
@@ -30,9 +41,14 @@ export default function Login() {
                   <div>
                     <div className="mb-3">
                       <div className="text-center mb-4">
-                        <Button className="btn-primary text-uppercase font-weight-bold font-size-sm my-3" onClick={login}>
+                        <Button 
+                          variant="contained"
+                          color="primary"
+                          size="small"
+                          className={classes.margin}
+                          onClick={login}>
                           Sign in
-                      </Button>
+                        </Button>
                       </div>
                     </div>
                   </div>
