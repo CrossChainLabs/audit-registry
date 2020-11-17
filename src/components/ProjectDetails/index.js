@@ -249,6 +249,7 @@ export default function ProjectDetails(base64Url) {
             <Collapse in={open}>
               <Alert
                 severity={severity}
+                style={{width: '98%', marginLeft: '1%'}}//, marginTop: '-0.5%'
                 action={
                   <IconButton aria-label="close" color="inherit" size="small"
                     onClick={() => { setOpen(false); }}>
