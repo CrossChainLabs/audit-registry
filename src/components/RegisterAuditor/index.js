@@ -2,9 +2,9 @@ import React, {useState} from 'react';
 import { Redirect } from "react-router-dom";
 import { useCookies } from 'react-cookie';
 import { Grid, Button, TextField, Paper} from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
 import Backdrop from '@material-ui/core/Backdrop';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import { makeStyles } from '@material-ui/core/styles';
 import IPFS from '../../ipfs'
 
 const useStyles = makeStyles((theme) => ({
@@ -91,26 +91,26 @@ export default function RegisterAuditor() {
                   <span className="text-center">
                     <h1 className="display-4 mb-1 font-weight-bold">
                       Register Auditor
-                              </h1>
+                    </h1>
                   </span>
                   <div>
                     <div className="mb-3">
                       <label className="font-weight-bold mb-2">
                         Account ID
-                                </label>
+                      </label>
                       <TextField
                         variant="outlined"
                         size="small"
                         fullWidth
                         placeholder="account id"
-                        value= {window.accountId}
+                        value={window.accountId}
                         disabled
                       />
                     </div>
                     <div className="mb-3">
                       <label className="font-weight-bold mb-2">
                         Metadata
-                                </label>
+                      </label>
                       <TextField
                         variant="outlined"
                         size="small"
@@ -124,8 +124,12 @@ export default function RegisterAuditor() {
                     </div>
 
                     <div className="text-center mb-4">
-                      <Button className="btn-primary text-uppercase font-weight-bold font-size-sm my-3"
-                              onClick={onRegisterAuditor}>
+                      <Button 
+                        variant="contained"
+                        color="primary"
+                        size="small"
+                        className={classes.margin}
+                        onClick={onRegisterAuditor}>
                         Register
                       </Button>
                     </div>
