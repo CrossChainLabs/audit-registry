@@ -19,7 +19,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function Auditors() {
   const classes = useStyles();
-  const [disableRegisterAuditor, setDisableRegisterAuditor] = React.useState(false);
+  const [disableRegisterAuditor, setDisableRegisterAuditor] = React.useState(window.isAuditor);
   const [auditors, set_auditors] = useState();
 
   const getAuditors = () => {
@@ -29,7 +29,8 @@ export default function Auditors() {
           auditorsFromContract.forEach(auditor => {
             console.log(auditorsFromContract);
             console.log(window.accountId);
-            if (auditor.account_id == window.accountId) {
+            if (auditor.account_id == window.accountId && !window.isAuditor) {
+              window.isAuditor = true;
               setDisableRegisterAuditor(true);
             }
           });
