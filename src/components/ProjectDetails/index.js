@@ -60,9 +60,7 @@ const useStyles = makeStyles((theme) => ({
     marginRight: theme.spacing(0),
   },
   iconButton: {
-    margin: theme.spacing(1),
-    marginBottom: theme.spacing(2),
-    marginLeft: theme.spacing(0),
+    padding: 0,
   },
   extendedIcon: {
     marginRight: theme.spacing(1),
@@ -157,7 +155,7 @@ export default function ProjectDetails(base64Url) {
           </a>
         </small>
         <small className="d-flex align-items-center">
-          <IconButton style={{margin: 0}} aria-label="view" onClick={() => { handleClickOpen('Description', project.metadata) }}>
+          <IconButton className={classes.iconButton} aria-label="view" onClick={() => { handleClickOpen('Description', project.metadata) }}>
             <MoreHorizIcon />
           </IconButton>
         </small>
@@ -241,9 +239,9 @@ export default function ProjectDetails(base64Url) {
         </tr>
       )) :
             <tr>
-              <td className="text-center">
+              <td className="text-left">
                 No audits.
-        </td>
+            </td>
             </tr>}
         </tbody>
     </Table>
