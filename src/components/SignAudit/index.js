@@ -1,7 +1,7 @@
 import React, {useState} from 'react';
 import { useCookies } from 'react-cookie';
 import { makeStyles } from '@material-ui/core/styles';
-import { Grid, Button, TextField, Paper, Collapse, IconButton } from '@material-ui/core';
+import { Grid, Button, TextField, Paper } from '@material-ui/core';
 import Backdrop from '@material-ui/core/Backdrop';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { Redirect } from "react-router-dom";
@@ -17,11 +17,8 @@ const useStyles = makeStyles((theme) => ({
 
 export default function SignAudit(codehash, url) {
   const classes = useStyles();
-  const [redirect, setRedirect] = React.useState(false);
-  const [codeHash, set_codeHash] = useState(codehash);
-  const [open, setOpen] = React.useState(false);
-  const [message, setMessage] = React.useState('');
-  const [severity, setSeverity] = React.useState('info');
+  const [redirect, setRedirect] = useState(false);
+  const [open, setOpen] = useState(false);
   const [cookies, setCookie] = useCookies([
     'auditData',
     'standards',
@@ -50,7 +47,7 @@ export default function SignAudit(codehash, url) {
       }
 
       window.contract.sign_audit({ 
-        code_hash: codeHash, 
+        code_hash: codehash, 
         audit_hash: audit_hash,
         standards: cookies.standards.split(";"),
         signature: cookies.signature
@@ -93,17 +90,13 @@ export default function SignAudit(codehash, url) {
 
   return (
     <>
-      <div className="app-wrapper bg-white min-vh-100">
-        <Grid container spacing={3}>
-          <Grid item xs>
-            <Paper />
-          </Grid>
+      <div className="d-flex">
           <Grid container spacing={3}>
             <Grid item xs>
               <Paper />
             </Grid>
             <Grid item xs>
-              <div className="w-100 pr-0 pr-lg-5">
+              <div>
                 <div className="text-black mt-3">
                   <span className="text-center">
                     <h1 className="display-4 mb-1 font-weight-bold">
@@ -120,7 +113,7 @@ export default function SignAudit(codehash, url) {
                         size="small"
                         fullWidth
                         placeholder="code hash"
-                        value={codeHash}
+                        value={codehash}
                         disabled
                       />
                     </div>
@@ -186,10 +179,6 @@ export default function SignAudit(codehash, url) {
               <Paper />
             </Grid>
           </Grid>
-          <Grid item xs>
-            <Paper />
-          </Grid>
-        </Grid>
       </div>
     </>
   );

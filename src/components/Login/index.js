@@ -18,17 +18,13 @@ export default function Login() {
   const classes = useStyles();
   return (
     <>
-      <div className="app-wrapper bg-white min-vh-100">
-        <Grid container spacing={3}>
-          <Grid item xs>
-            <Paper />
-          </Grid>
+      <div className="d-flex">
           <Grid container spacing={3}>
             <Grid item xs>
               <Paper />
             </Grid>
             <Grid item xs>
-              <div className="w-100 pr-0 pr-lg-5">
+              <div>
                 <div className="text-black mt-3">
                   <span className="text-center">
                     <h1 className="display-4 mb-1 font-weight-bold">
@@ -59,10 +55,6 @@ export default function Login() {
               <Paper />
             </Grid>
           </Grid>
-          <Grid item xs>
-            <Paper />
-          </Grid>
-        </Grid>
       </div>
     </>
   );

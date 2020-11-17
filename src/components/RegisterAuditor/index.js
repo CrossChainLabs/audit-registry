@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React from 'react';
 import { Redirect } from "react-router-dom";
 import { useCookies } from 'react-cookie';
 import { Grid, Button, TextField, Paper} from '@material-ui/core';
@@ -49,7 +49,7 @@ export default function RegisterAuditor() {
         window.contract.get_auditors_list()
           .then(auditorsFromContract => {
             let added = false;
-            auditorsFromContract.map((auditor) => {
+            auditorsFromContract.forEach((auditor) => {
               if (auditor.account_id === accountId) {
                 added = true;
               }
@@ -76,17 +76,13 @@ export default function RegisterAuditor() {
 
   return (
     <>
-      <div className="app-wrapper bg-white min-vh-100">
-        <Grid container spacing={3}>
-          <Grid item xs>
-            <Paper />
-          </Grid>
+      <div className="d-flex">
           <Grid container spacing={3}>
             <Grid item xs>
               <Paper />
             </Grid>
             <Grid item xs>
-              <div className="w-100 pr-0 pr-lg-5">
+              <div>
                 <div className="text-black mt-3">
                   <span className="text-center">
                     <h1 className="display-4 mb-1 font-weight-bold">
@@ -141,10 +137,6 @@ export default function RegisterAuditor() {
               <Paper />
             </Grid>
           </Grid>
-          <Grid item xs>
-            <Paper />
-          </Grid>
-        </Grid>
         <Backdrop className={classes.backdrop} open={open}>
           <CircularProgress color="inherit" />
         </Backdrop>

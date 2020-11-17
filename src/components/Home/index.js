@@ -21,11 +21,8 @@ export default function Home() {
   const [message, setMessage] = React.useState('');
   const [severity, setSeverity] = React.useState('info');
 
-  console.log('home: ');
-
   React.useEffect(
     () => {
-      console.log('home: useEffect');
       if (window.homepage) {
         setSeverity(window.homepage?.alert?.severity);
         setMessage(window.homepage?.alert?.msg);
@@ -34,7 +31,7 @@ export default function Home() {
         window.homepage = null;
       }
     },
-    [window.homepage]
+    []
   )
 
   return (

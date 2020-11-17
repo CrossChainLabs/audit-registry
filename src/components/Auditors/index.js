@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
-import { Button, IconButton, Badge } from '@material-ui/core';
-import MoreVertRoundedIcon from '@material-ui/icons/MoreVertRounded';
+import { Button } from '@material-ui/core';
 import AddCircleRoundedIcon from '@material-ui/icons/AddCircleRounded';
 import PerfectScrollbar from 'react-perfect-scrollbar';
 import { REFRESH_INTERVAL } from '../../utils'
@@ -26,14 +25,17 @@ export default function Auditors() {
     if (window.walletConnection.isSignedIn()) {
       window.contract.get_auditors_list()
         .then(auditorsFromContract => {
+          let isAuditor = false;
           auditorsFromContract.forEach(auditor => {
             console.log(auditorsFromContract);
             console.log(window.accountId);
-            if (auditor.account_id == window.accountId && !window.isAuditor) {
-              window.isAuditor = true;
+            if (auditor.account_id === window.accountId) {
+              isAuditor = true;
               setDisableRegisterAuditor(true);
             }
           });
+
+          window.isAuditor = isAuditor;
           set_auditors(auditorsFromContract)
         })
     }

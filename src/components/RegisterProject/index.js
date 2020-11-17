@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React from 'react';
 import { Redirect } from "react-router-dom";
 import { useCookies } from 'react-cookie';
 import { Grid, Button, TextField, Paper } from '@material-ui/core';
@@ -58,7 +58,7 @@ export default function RegisterProject() {
         window.contract.get_projects_list()
           .then(projectsFromContract => {
             let added = false;
-            projectsFromContract.map((project) => {
+            projectsFromContract.forEach((project) => {
               if (project.code_hash === cookies.projectCodeHash) {
                 added = true;
               }
@@ -89,17 +89,13 @@ export default function RegisterProject() {
 
   return (
     <>
-      <div className="app-wrapper bg-white min-vh-100">
-        <Grid container spacing={3}>
-          <Grid item xs>
-            <Paper />
-          </Grid>
+      <div className="d-flex">
           <Grid container spacing={3}>
             <Grid item xs>
               <Paper />
             </Grid>
             <Grid item xs>
-              <div className="w-100 pr-0 pr-lg-5">
+              <div>
                 <div className="text-black mt-3">
                   <span className="text-center">
                     <h1 className="display-4 mb-1 font-weight-bold">
@@ -182,10 +178,6 @@ export default function RegisterProject() {
               <Paper />
             </Grid>
           </Grid>
-          <Grid item xs>
-            <Paper />
-          </Grid>
-        </Grid>
       </div>
     </>
   );

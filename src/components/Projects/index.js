@@ -32,13 +32,13 @@ export default function Projects() {
             return b.index - a.index;
           })
           //extract old versions
-          let proccesedProjects = new Array();
+          let proccesedProjects = [];
           projectsFromContract.forEach(project => {
             let found = proccesedProjects.find(((element, index, arr) => {
               if (element.url === project.url) {
                 arr[index].versions++;
               }
-              return element.url == project.url;
+              return element.url === project.url;
             }));
 
             if (!found) {

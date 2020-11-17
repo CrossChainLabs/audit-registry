@@ -1,6 +1,6 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import { AppBar, Toolbar, Typography, Link } from '@material-ui/core';
+import { AppBar, Toolbar, Typography } from '@material-ui/core';
 import { NavLink } from 'react-router-dom';
 
 import projectLogo from '../../assets/logo-white.svg';

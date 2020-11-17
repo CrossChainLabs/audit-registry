@@ -11,6 +11,7 @@ import MuiDialogActions from "@material-ui/core/DialogActions";
 import PerfectScrollbar from 'react-perfect-scrollbar';
 import AddCircleRoundedIcon from '@material-ui/icons/AddCircleRounded';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
+import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faGithub } from '@fortawesome/free-brands-svg-icons'
 import { encode, decode } from 'js-base64';
@@ -58,14 +59,19 @@ const useStyles = makeStyles((theme) => ({
     marginBottom: theme.spacing(2),
     marginRight: theme.spacing(0),
   },
+  iconButton: {
+    margin: theme.spacing(1),
+    marginBottom: theme.spacing(2),
+    marginLeft: theme.spacing(0),
+  },
   extendedIcon: {
     marginRight: theme.spacing(1),
   },
   dialogPaper: {
-    minHeight: '80vh',
-    maxHeight: '80vh',
-    minWidth: '80vh',
-    maxWidth: '80vh',
+    minHeight: '40vh',
+    maxHeight: '40vh',
+    minWidth: '40vh',
+    maxWidth: '40vh',
   },
 }));
 
@@ -77,11 +83,12 @@ export default function ProjectDetails(base64Url) {
   const [url, setUrl] = useState(decode(base64Url));
   const [title, setTitle] = useState();
   const [projects, setProjects] = useState();
-  const [description, setDescription] = useState();
   const [data, setData] = React.useState();
   const [open, setOpen] = React.useState(false);
   const [message, setMessage] = React.useState('');
   const [severity, setSeverity] = React.useState('info');
+
+  console.log(url);
 
   const handleClickOpen = async (title, hash) => {
     if (!hash) return;
@@ -102,15 +109,14 @@ export default function ProjectDetails(base64Url) {
       if (window.walletConnection.isSignedIn()) {
         window.contract.get_projects_list()
           .then(async projectsFromContract => {
-            let proccesedProjects = new Array();
+            let proccesedProjects = [];
 
             var projectsSlice = projectsFromContract;
             while (projectsSlice.length) {
               await Promise.all(projectsSlice.splice(0, 1).map(async (project) => {
                 if (project.url === url) {
                   let certificatesFromContract = await window.contract.get_project_certificates({ code_hash: project.code_hash });
-                  let description = await IPFS.getInstance().Load(project.metadata);
-                  proccesedProjects.push({ ...project, description: description, certificates: certificatesFromContract });
+                  proccesedProjects.push({ ...project, certificates: certificatesFromContract });
                 }
               }));
             }
@@ -138,28 +144,24 @@ export default function ProjectDetails(base64Url) {
 
   const Project = (project) => (
     <div className="d-flex justify-content-between">
-          <div>
-            <h2 className="font-weight-bold text-black">
-              {project?.name}
-            </h2>
-            <small className="d-flex align-items-center">
-              <a href={project?.url}>
-                {project?.url}
-              </a>
-            </small>
-            <div/>
-            <small className="d-flex align-items-center">
-              <a href={project.url + '/tree/' + project.code_hash}>
-                <FontAwesomeIcon icon={faGithub} /> {project.code_hash}
-              </a>
-            </small>
-            <div className="font-weight-bold"> 
-              Description
-            </div>
-            <small className="d-flex align-items-center">
-              {project.description}
-            </small>
-          </div>
+      <div>
+        <a href={url}>
+          <h2 className="font-weight-bold text-black">
+            {project?.name}
+          </h2>
+        </a>
+        <div />
+        <small className="d-flex align-items-center">
+          <a href={project.url + '/tree/' + project.code_hash}>
+            <FontAwesomeIcon icon={faGithub} /> {project.code_hash}
+          </a>
+        </small>
+        <small className="d-flex align-items-center">
+          <IconButton style={{margin: 0}} aria-label="view" onClick={() => { handleClickOpen('Description', project.metadata) }}>
+            <MoreHorizIcon />
+          </IconButton>
+        </small>
+      </div>
       <div>
         <Button
           variant="contained"

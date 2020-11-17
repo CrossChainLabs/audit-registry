@@ -61,7 +61,7 @@ pub struct ProjectStore {
     url: String,
     metadata: Hash, // project's metadata
     status: bool,
-    index: u32
+    index: u64
 }
 
 #[derive(BorshDeserialize, BorshSerialize, Default, Serialize)]
@@ -71,7 +71,7 @@ pub struct Project {
     url: String,
     metadata: Hash, // project's metadata
     status: bool,
-    index: u32
+    index: u64
 }
 
 #[near_bindgen]
@@ -79,7 +79,7 @@ pub struct Project {
 pub struct AuditRegistry {
     auditors: HashMap<AccountId, AuditorStore>,
     projects: HashMap<Hash, ProjectStore>,
-    project_index: u32
+    project_index: u64
 }
 
 #[near_bindgen]
@@ -132,7 +132,7 @@ impl AuditRegistry {
             status: false,
             index: self.project_index});
     
-        if self.project_index < u32::MAX {
+        if self.project_index < u64::MAX {
             self.project_index += 1;
         }
     }
@@ -157,6 +157,11 @@ impl AuditRegistry {
                     Some(project) => {
                         env::log(format!("sign_audit project.status: {}", project.status).as_bytes());
                         project.status = true; //true = completed
+                        project.index = self.project_index;
+
+                        if self.project_index < u64::MAX {
+                            self.project_index += 1;
+                        }
                     },
                     None => {}
                 }
@@ -194,6 +199,17 @@ impl AuditRegistry {
                     env::log(format!("advisory_hash: {}", advisory_hash).as_bytes());
                     certificate_store.advisory_hash = advisory_hash;
                     env::log(format!("certificate_store.advisory_hash: {}", certificate_store.advisory_hash).as_bytes());
+
+                    match self.projects.get_mut(&code_hash) {
+                        Some(project) => {
+                            project.index = self.project_index;
+    
+                            if self.project_index < u64::MAX {
+                                self.project_index += 1;
+                            }
+                        },
+                        None => {}
+                    }
                 },
                 None => {}
                 }
