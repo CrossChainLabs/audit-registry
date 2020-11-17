@@ -46,7 +46,6 @@ const DialogActions = withStyles((theme) => ({
   }
 }))(MuiDialogActions);
 
-
 const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
@@ -59,6 +58,12 @@ const useStyles = makeStyles((theme) => ({
   },
   extendedIcon: {
     marginRight: theme.spacing(1),
+  },
+  dialogPaper: {
+    minHeight: '80vh',
+    maxHeight: '80vh',
+    minWidth: '80vh',
+    maxWidth: '80vh',
   },
 }));
 
@@ -264,6 +269,7 @@ export default function ProjectDetails(base64Url) {
           <Grid item xs>
             <Paper />
             <Dialog
+            classes={{ paper: classes.dialogPaper }}
               aria-labelledby="customized-dialog-title"
               open={openPopup}
             >
