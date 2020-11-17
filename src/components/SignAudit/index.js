@@ -2,18 +2,16 @@ import React, {useState} from 'react';
 import { useCookies } from 'react-cookie';
 import { makeStyles } from '@material-ui/core/styles';
 import { Grid, Button, TextField, Paper, Collapse, IconButton } from '@material-ui/core';
-import CloseIcon from '@material-ui/icons/Close';
-import Alert from '@material-ui/lab/Alert';
+import Backdrop from '@material-ui/core/Backdrop';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import { Redirect } from "react-router-dom";
 
 import IPFS from '../../ipfs'
 
 const useStyles = makeStyles((theme) => ({
-  root: {
-    width: '100%',
-    '& > * + *': {
-      marginTop: theme.spacing(2),
-    },
+  backdrop: {
+    zIndex: theme.zIndex.drawer + 1,
+    color: '#fff',
   },
 }));
 
@@ -25,9 +23,7 @@ export default function SignAudit(codehash, url) {
   const [message, setMessage] = React.useState('');
   const [severity, setSeverity] = React.useState('info');
   const [cookies, setCookie] = useCookies([
-    'signAudit',
     'auditData',
-    'audit_hash',
     'standards',
     'signature'
   ]);
@@ -41,43 +37,10 @@ export default function SignAudit(codehash, url) {
     }
   };
 
-  React.useEffect(
-    () => {
-      if (window.walletConnection.isSignedIn() && cookies.signAudit === 'true') {
-        window.contract.get_project_certificates({ code_hash: codehash })
-          .then(certificatesFromContract => {
-            let added = false;
-            certificatesFromContract.forEach(certificateFromContract => {
-              console.log(certificateFromContract)
-              console.log(codehash);
-              console.log(cookies.audit_hash);
-              if ((certificateFromContract.code_hash === codehash) &&
-                 (certificateFromContract.audit_hash === cookies.audit_hash))
-              {
-                added = true;
-              }
-            });
-
-            if (added) {
-              alert('success', `Audit for codehash ${codehash} successfuly added !`);
-
-              setCookie('auditData', '', { path: '/' });
-              setCookie('audit_hash', '', { path: '/' });
-              setCookie('standards', '', { path: '/' });
-              setCookie('signature', '', { path: '/' });
-            } else {
-              alert('error', `Unable to add audit for codehash ${codehash} !`);
-            }
-
-            setCookie('signAudit', 'false', { path: '/' });
-          })
-      }
-    },
-    [redirect]
-  )
 
   const onSign = async () => {
     if (window.walletConnection.isSignedIn()) {
+      setOpen(true);
       let audit_hash = await IPFS.getInstance().Save(cookies.auditData);
 
       if (!audit_hash) {
@@ -86,16 +49,40 @@ export default function SignAudit(codehash, url) {
         return;
       }
 
-      setCookie('signAudit', 'true', { path: '/' });
-      setCookie('audit_hash', audit_hash, { path: '/' });
-
       window.contract.sign_audit({ 
         code_hash: codeHash, 
         audit_hash: audit_hash,
         standards: cookies.standards.split(";"),
         signature: cookies.signature
       }).then(result => {
-        setRedirect(true);
+        window.contract.get_project_certificates({ code_hash: codehash })
+        .then(certificatesFromContract => {
+          let added = false;
+          certificatesFromContract.forEach(certificateFromContract => {
+            console.log(certificateFromContract)
+            console.log(codehash);
+            console.log(cookies.audit_hash);
+            if ((certificateFromContract.code_hash === codehash) &&
+               (certificateFromContract.audit_hash === audit_hash))
+            {
+              added = true;
+            }
+          });
+
+          setOpen(false);
+
+          if (added) {
+            alert('success', `Audit for codehash: ${codehash} successfuly added !`);
+
+            setCookie('auditData', '', { path: '/' });
+            setCookie('standards', '', { path: '/' });
+            setCookie('signature', '', { path: '/' });
+          } else {
+            alert('error', `Unable to add audit for codehash ${codehash} !`);
+          }
+
+          setRedirect(true);
+        })
       })
     }
   }
@@ -108,21 +95,6 @@ export default function SignAudit(codehash, url) {
     <>
       <div className="app-wrapper bg-white min-vh-100">
         <Grid container spacing={3}>
-        <div className={classes.root}>
-            <Collapse in={open}>
-              <Alert
-                severity={severity}
-                action={
-                  <IconButton aria-label="close" color="inherit" size="small"
-                    onClick={() => { setOpen(false); }}>
-                    <CloseIcon fontSize="inherit" />
-                  </IconButton>
-                }
-              >
-                {message}
-              </Alert>
-            </Collapse>
-          </div>
           <Grid item xs>
             <Paper />
           </Grid>
@@ -198,6 +170,9 @@ export default function SignAudit(codehash, url) {
                               onClick={onSign}>
                         Sign
                       </Button>
+                      <Backdrop className={classes.backdrop} open={open}>
+                        <CircularProgress color="inherit" />
+                      </Backdrop>
                     </div>
                   </div>
                 </div>

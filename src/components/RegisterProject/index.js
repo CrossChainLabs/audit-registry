@@ -2,10 +2,22 @@ import React, {useState} from 'react';
 import { Redirect } from "react-router-dom";
 import { useCookies } from 'react-cookie';
 import { Grid, Button, TextField, Paper } from '@material-ui/core';
+import Backdrop from '@material-ui/core/Backdrop';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import { makeStyles } from '@material-ui/core/styles';
 import IPFS from '../../ipfs'
 
+const useStyles = makeStyles((theme) => ({
+  backdrop: {
+    zIndex: theme.zIndex.drawer + 1,
+    color: '#fff',
+  },
+}));
+
 export default function RegisterProject() {
+  const classes = useStyles();
   const [redirect, setRedirect] = React.useState(false);
+  const [open, setOpen] = React.useState(false);
   const [cookies, setCookie] = useCookies(['projectName',
     'projectUrl',
     'projectMetadata',
@@ -22,6 +34,7 @@ export default function RegisterProject() {
 
   const onSubmit = async () => {
     if (window.walletConnection.isSignedIn()) {
+      setOpen(true);
       let metadata_hash = await IPFS.getInstance().Save(cookies.projectMetadata);
 
       if (!metadata_hash) {
@@ -43,6 +56,8 @@ export default function RegisterProject() {
                 added = true;
               }
             });
+
+            setOpen(false);
 
             if (added) {
               alert('success', `Project ${cookies.projectName} successfuly added !`, { path: '/' });
@@ -144,6 +159,9 @@ export default function RegisterProject() {
                               onClick={onSubmit}>
                         Submit
                       </Button>
+                      <Backdrop className={classes.backdrop} open={open}>
+                        <CircularProgress color="inherit" />
+                      </Backdrop>
                     </div>
                   </div>
                 </div>

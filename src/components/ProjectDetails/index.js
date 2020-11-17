@@ -119,7 +119,7 @@ export default function ProjectDetails(base64Url) {
               setSeverity(window.pageProjectDetails?.alert?.severity);
               setMessage(window.pageProjectDetails?.alert?.msg);
               setOpen(true);
-              
+
               window.pageProjectDetails = null;
             }
 
@@ -165,6 +165,7 @@ export default function ProjectDetails(base64Url) {
           className={classes.margin}
           startIcon={<AddCircleRoundedIcon />}
           component={Link}
+          disabled={window.isAuditor === false}
           to={'/PageSignAudit/' + project?.code_hash + '/' + encode(project?.url)}>
           Audit
       </Button>
@@ -175,6 +176,7 @@ export default function ProjectDetails(base64Url) {
           className={classes.margin}
           startIcon={<AddCircleRoundedIcon />}
           component={Link}
+          disabled={window.isAuditor === false}
           to={'/PageReportAdvisory/' + project?.code_hash + '/' + encode(project?.url)}>
           Advisory
       </Button>
