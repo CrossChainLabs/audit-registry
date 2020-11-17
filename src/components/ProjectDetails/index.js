@@ -55,6 +55,8 @@ const useStyles = makeStyles((theme) => ({
   },
   margin: {
     margin: theme.spacing(1),
+    marginBottom: theme.spacing(2),
+    marginRight: theme.spacing(0),
   },
   extendedIcon: {
     marginRight: theme.spacing(1),
@@ -140,13 +142,13 @@ export default function ProjectDetails(base64Url) {
             <h2 className="font-weight-bold text-black">
               {project?.name}
             </h2>
-            <small className="d-flex pt-2 align-items-center">
+            <small className="d-flex align-items-center">
               <a href={project?.url}>
                 {project?.url}
               </a>
             </small>
             <div/>
-            <small className="d-flex pt-2 align-items-center">
+            <small className="d-flex align-items-center">
               <a href={project.url + '/tree/' + project.code_hash}>
                 <FontAwesomeIcon icon={faGithub} /> {project.code_hash}
               </a>
@@ -154,15 +156,11 @@ export default function ProjectDetails(base64Url) {
             <div className="font-weight-bold"> 
               Description
             </div>
-            <small className="d-flex pt-2 align-items-center">
+            <small className="d-flex align-items-center">
               {project.description}
             </small>
           </div>
       <div>
-        {(project?.status) ?
-          <div className="badge badge-success">Completed</div> :
-          <div className="badge badge-warning">Pending</div>
-        }
         <Button
           variant="contained"
           color="primary"
@@ -185,6 +183,15 @@ export default function ProjectDetails(base64Url) {
           to={'/PageReportAdvisory/' + project?.code_hash + '/' + encode(project?.url)}>
           Advisory
       </Button>
+        <div className="d-flex justify-content-between">
+          <div></div>
+          <small className="d-flex">
+            {(project?.status) ?
+              <div className="badge badge-success">Completed</div> :
+              <div className="badge badge-warning">Pending</div>
+            }
+          </small>
+        </div>
       </div>
     </div>
   );
