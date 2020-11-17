@@ -13,7 +13,7 @@ import AddCircleRoundedIcon from '@material-ui/icons/AddCircleRounded';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faGithub } from '@fortawesome/free-brands-svg-icons'
-import { decode } from 'js-base64';
+import { encode, decode } from 'js-base64';
 import IPFS from '../../ipfs'
 import Header from '../Header';
 
@@ -113,6 +113,15 @@ export default function ProjectDetails(base64Url) {
             });
 
             setProjects(proccesedProjects);
+            console.log(window.pageProjectDetails)
+
+            if (window.pageProjectDetails) {
+              setSeverity(window.pageProjectDetails?.alert?.severity);
+              setMessage(window.pageProjectDetails?.alert?.msg);
+              setOpen(true);
+              
+              window.pageProjectDetails = null;
+            }
 
           });
       }
@@ -156,7 +165,7 @@ export default function ProjectDetails(base64Url) {
           className={classes.margin}
           startIcon={<AddCircleRoundedIcon />}
           component={Link}
-          to={'/PageSignAudit' + project?.code_hash}>
+          to={'/PageSignAudit/' + project?.code_hash + '/' + encode(project?.url)}>
           Audit
       </Button>
         <Button
@@ -166,7 +175,7 @@ export default function ProjectDetails(base64Url) {
           className={classes.margin}
           startIcon={<AddCircleRoundedIcon />}
           component={Link}
-          to={'/PageReportAdvisory' + project?.code_hash}>
+          to={'/PageReportAdvisory/' + project?.code_hash + '/' + encode(project?.url)}>
           Advisory
       </Button>
       </div>

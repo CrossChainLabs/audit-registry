@@ -4,6 +4,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { Grid, Button, TextField, Paper, Collapse, IconButton } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import Alert from '@material-ui/lab/Alert';
+import { Redirect } from "react-router-dom";
 
 import IPFS from '../../ipfs'
 
@@ -16,8 +17,9 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function SignAudit(codehash) {
+export default function SignAudit(codehash, url) {
   const classes = useStyles();
+  const [redirect, setRedirect] = React.useState(false);
   const [codeHash, set_codeHash] = useState(codehash);
   const [open, setOpen] = React.useState(false);
   const [message, setMessage] = React.useState('');
@@ -29,6 +31,15 @@ export default function SignAudit(codehash) {
     'standards',
     'signature'
   ]);
+
+  const alert = (severity, msg) => {
+    window.pageProjectDetails = {
+      alert: {
+        msg: msg,
+        severity: severity
+      }
+    }
+  };
 
   React.useEffect(
     () => {
@@ -48,24 +59,21 @@ export default function SignAudit(codehash) {
             });
 
             if (added) {
-              setSeverity('success');
-              setMessage(`Audit for codehash ${codehash} successfuly added !`);
+              alert('success', `Audit for codehash ${codehash} successfuly added !`);
 
               setCookie('auditData', '', { path: '/' });
               setCookie('audit_hash', '', { path: '/' });
               setCookie('standards', '', { path: '/' });
               setCookie('signature', '', { path: '/' });
             } else {
-              setSeverity('error');
-              setMessage(`Unable to add audit for codehash ${codehash} !`);
+              alert('error', `Unable to add audit for codehash ${codehash} !`);
             }
 
             setCookie('signAudit', 'false', { path: '/' });
-            setOpen(true);
           })
       }
     },
-    []
+    [redirect]
   )
 
   const onSign = async () => {
@@ -73,10 +81,7 @@ export default function SignAudit(codehash) {
       let audit_hash = await IPFS.getInstance().Save(cookies.auditData);
 
       if (!audit_hash) {
-        //Unable to save metadata on IPFS'
-        setSeverity('error');
-        setMessage('Unable to save audit data on IPFS !');
-        setOpen(true);
+        alert('error', 'Unable to save audit data on IPFS !');
 
         return;
       }
@@ -90,9 +95,13 @@ export default function SignAudit(codehash) {
         standards: cookies.standards.split(";"),
         signature: cookies.signature
       }).then(result => {
-          console.log('onSignAudit: ' + result);
-        })
+        setRedirect(true);
+      })
     }
+  }
+
+  if (redirect) {
+    return <Redirect to={'/PageProjectDetails/' + url} />
   }
 
   return (

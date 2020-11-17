@@ -12,6 +12,15 @@ export default function RegisterProject() {
     'projectCodeHash',
     'registerProject']);
 
+    const alert = (severity, msg) => {
+      window.pageProjectDetails = {
+        alert: {
+          msg: msg,
+          severity: severity
+        }
+      }
+    };
+
   React.useEffect(
     () => {
       if (window.walletConnection.isSignedIn() && cookies.registerProject === 'true') {
@@ -25,16 +34,14 @@ export default function RegisterProject() {
             });
 
             if (added) {
-              setCookie('homeAlertMessage', `Project ${cookies.projectName} successfuly added !`, { path: '/' });
-              setCookie('homeAlertSeverity', 'success', { path: '/' });
+              alert('success', `Project ${cookies.projectName} successfuly added !`, { path: '/' });
 
               setCookie('projectName', '', { path: '/' });
               setCookie('projectUrl', '', { path: '/' });
               setCookie('projectMetadata', '', { path: '/' });
               setCookie('projectCodeHash', '', { path: '/' });
             } else {
-              setCookie('homeAlertMessage', `Unable to add project ${cookies.projectName} !`, { path: '/' });
-              setCookie('homeAlertSeverity', 'error', { path: '/' });
+              alert('error', `Unable to add project ${cookies.projectName} !`, { path: '/' });
             }
 
             setCookie('registerProject', 'false', { path: '/' });
@@ -50,8 +57,7 @@ export default function RegisterProject() {
       let metadata_hash = await IPFS.getInstance().Save(cookies.projectMetadata);
 
       if (!metadata_hash) {
-        setCookie('homeAlertMessage', `Unable to save metadata on IPFS !`, { path: '/' });
-        setCookie('homeAlertSeverity', 'error', { path: '/' });
+        alert('error', `Unable to save metadata on IPFS !`, { path: '/' });
         return;
       }
 
@@ -63,8 +69,8 @@ export default function RegisterProject() {
         metadata: metadata_hash,
         code_hash: cookies.projectCodeHash
       }).then(result => {
-          console.log('onRegisterProject: ' + result);
-        })
+        setRedirect(true);
+      })
     }
   }
 

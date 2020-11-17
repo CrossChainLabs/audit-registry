@@ -37,6 +37,14 @@ export default function Home() {
         setCookie('homeAlertMessage', '', { path: '/' });
         setCookie('homeAlertSeverity', '', { path: '/' });
       }
+
+      if (window.pageProjectDetails) {
+        setSeverity(window.pageProjectDetails?.alert?.severity);
+        setMessage(window.pageProjectDetails?.alert?.msg);
+        setOpen(true);
+        
+        window.pageProjectDetails = null;
+      }
     },
     []
   )

@@ -4,6 +4,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { Grid, Button, TextField, Paper, Collapse, IconButton } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import Alert from '@material-ui/lab/Alert';
+import { Redirect } from "react-router-dom";
 
 import IPFS from '../../ipfs'
 
@@ -16,8 +17,9 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function ReportAdvisory(codehash) {
+export default function ReportAdvisory(codehash, url) {
   const classes = useStyles();
+  const [redirect, setRedirect] = React.useState(false);
   const [codeHash, set_codeHash] = useState(codehash);
   const [open, setOpen] = React.useState(false);
   const [message, setMessage] = React.useState('');
@@ -27,6 +29,15 @@ export default function ReportAdvisory(codehash) {
     'advisoryData',
     'advisory_hash'
   ]);
+
+  const alert = (severity, msg) => {
+    window.pageProjectDetails = {
+      alert: {
+        msg: msg,
+        severity: severity
+      }
+    }
+  };
 
   React.useEffect(
     () => {
@@ -43,22 +54,19 @@ export default function ReportAdvisory(codehash) {
             });
 
             if (added) {
-              setSeverity('success');
-              setMessage(`Advisory for codehash ${codehash} successfuly added !`);
+              alert('success', `Advisory for codehash ${codehash} successfuly added !`);
 
               setCookie('advisoryData', '', { path: '/' });
               setCookie('advisory_hash', '', { path: '/' });
             } else {
-              setSeverity('error');
-              setMessage(`Unable to add advisory for codehash ${codehash} !`);
+              alert('error', `Unable to add advisory for codehash ${codehash} !`);
             }
 
             setCookie('reportAdvisory', 'false', { path: '/' });
-            setOpen(true);
           })
       }
     },
-    []
+    [redirect]
   )
 
   
@@ -67,11 +75,7 @@ export default function ReportAdvisory(codehash) {
       let advisory_hash = await IPFS.getInstance().Save(cookies.advisoryData);
 
       if (!advisory_hash) {
-        //Unable to save metadata on IPFS'
-        setSeverity('error');
-        setMessage('Unable to save advisory data on IPFS !');
-        setOpen(true);
-
+        alert('error', 'Unable to save advisory data on IPFS !');
         return;
       }
 
@@ -80,9 +84,13 @@ export default function ReportAdvisory(codehash) {
 
       window.contract.report_advisory({ code_hash: codehash, advisory_hash: advisory_hash })
         .then(result => {
-          alert('onAdvisoryReport: ' + result);
+          setRedirect(true);
         });
     }
+  }
+
+  if (redirect) {
+    return <Redirect to={'/PageProjectDetails/' + url} />
   }
 
   return (
