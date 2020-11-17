@@ -24,8 +24,7 @@ export default function Login() {
                       Welcome to Audit Registry
                     </h1>
                     <p>
-                      To make use of the Audit Registry, you need to sign in. The button
-                      below will sign you in using NEAR Wallet.
+                      To continue you need to sign in using NEAR Wallet.
                     </p>
                   </span>
                   <div>

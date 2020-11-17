@@ -41,9 +41,10 @@ export default function Home() {
     <>
       <div className="app-wrapper bg-white min-vh-100">
         <Grid container spacing={6}>
-        <div className={classes.alert}>
+          <div className={classes.alert}>
             <Collapse in={open}>
               <Alert
+                style={{width: '98%', marginLeft: '1%'}}//, marginTop: '-0.5%'
                 severity={severity}
                 action={
                   <IconButton aria-label="close" color="inherit" size="small"
@@ -57,7 +58,7 @@ export default function Home() {
             </Collapse>
           </div>
           <Grid item xs>
-            <Paper/>
+            <Paper />
           </Grid>
           <Grid item xl={4}>
             <Auditors />
