@@ -12,6 +12,13 @@ const useStyles = makeStyles((theme) => ({
     zIndex: theme.zIndex.drawer + 1,
     color: '#fff',
   },
+  margin: {
+    margin: theme.spacing(0),
+    marginBottom: theme.spacing(2),
+  },
+  extendedIcon: {
+    marginRight: theme.spacing(1),
+  },
 }));
 
 export default function RegisterProject() {
@@ -31,16 +38,6 @@ export default function RegisterProject() {
       }
     }
   };
-  
-  const useStyles = makeStyles((theme) => ({
-    margin: {
-      margin: theme.spacing(0),
-      marginBottom: theme.spacing(2),
-    },
-    extendedIcon: {
-      marginRight: theme.spacing(1),
-    },
-  }));
 
   const onSubmit = async () => {
     if (window.walletConnection.isSignedIn()) {
