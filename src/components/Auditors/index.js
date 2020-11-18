@@ -20,6 +20,7 @@ export default function Auditors() {
   const classes = useStyles();
   const [disableRegisterAuditor, setDisableRegisterAuditor] = React.useState(window.isAuditor);
   const [auditors, set_auditors] = useState();
+  const [hidden, set_hidden] = useState(true);
 
   const getAuditors = () => {
     if (window.walletConnection.isSignedIn()) {
@@ -36,7 +37,8 @@ export default function Auditors() {
           });
 
           window.isAuditor = isAuditor;
-          set_auditors(auditorsFromContract)
+          set_hidden(false);
+          set_auditors(auditorsFromContract);
         })
     }
   }
@@ -70,7 +72,8 @@ export default function Auditors() {
                   disabled = {disableRegisterAuditor}
                   className={classes.margin}
                   startIcon={<AddCircleRoundedIcon />}
-                  component={Link} 
+                  component={Link}
+                  hidden = {hidden}
                   to='/PageRegisterAuditor'>
                   Auditor
                 </Button>

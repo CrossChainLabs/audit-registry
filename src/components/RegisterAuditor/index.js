@@ -105,7 +105,7 @@ export default function RegisterAuditor() {
                     </div>
                     <div className="mb-3">
                       <label className="font-weight-bold mb-2">
-                        Metadata
+                        Description
                       </label>
                       <TextField
                         variant="outlined"

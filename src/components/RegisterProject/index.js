@@ -100,13 +100,13 @@ export default function RegisterProject() {
                   <span className="text-center">
                     <h1 className="display-4 mb-1 font-weight-bold">
                       Add Project
-                              </h1>
+                    </h1>
                   </span>
                   <div>
                     <div className="mb-3">
                       <label className="font-weight-bold mb-2">
                         Name
-                                </label>
+                      </label>
                       <TextField
                         variant="outlined"
                         size="small"
@@ -119,7 +119,7 @@ export default function RegisterProject() {
                     <div className="mb-3">
                       <label className="font-weight-bold mb-2">
                         URL
-                                </label>
+                      </label>
                       <TextField
                         variant="outlined"
                         size="small"
@@ -132,7 +132,7 @@ export default function RegisterProject() {
                     <div className="mb-3">
                       <label className="font-weight-bold mb-2">
                         Code Hash
-                                </label>
+                      </label>
                       <TextField
                         variant="outlined"
                         size="small"
@@ -144,8 +144,8 @@ export default function RegisterProject() {
                     </div>
                     <div className="mb-3">
                       <label className="font-weight-bold mb-2">
-                        Metadata
-                                </label>
+                        Description
+                      </label>
                       <TextField
                         variant="outlined"
                         size="small"
