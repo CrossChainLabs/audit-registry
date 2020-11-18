@@ -1,4 +1,4 @@
-const CONTRACT_NAME = process.env.CONTRACT_NAME ||'audit-registry'
+const CONTRACT_NAME = process.env.REACT_APP_CONTRACT_NAME || 'audit-registry'
 
 function getConfig(env) {
   switch (env) {

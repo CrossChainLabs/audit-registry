@@ -3,6 +3,8 @@ import getConfig from './config'
 
 const nearConfig = getConfig(process.env.NODE_ENV || 'development')
 
+export const REFRESH_INTERVAL = 10000;
+
 // Initialize contract & set global variables
 export async function initContract() {
   // Initialize connection to the NEAR testnet
@@ -18,16 +20,16 @@ export async function initContract() {
   // Initializing our contract APIs by contract name and configuration
   window.contract = await new Contract(window.walletConnection.account(), nearConfig.contractName, {
     // View methods are read only. They don't modify the state, but usually return some value.
-    viewMethods: ['get_greeting'],
+    viewMethods: ['get_auditors_list', 'get_projects_list', 'get_project_certificates'],
     // Change methods can modify the state. But you don't receive the returned value when called.
-    changeMethods: ['set_greeting'],
+    changeMethods: ['register_auditor', 'register_project', 'sign_audit', 'report_advisory'],
   })
 }
 
 export function logout() {
   window.walletConnection.signOut()
   // reload page
-  window.location.replace(window.location.origin + window.location.pathname)
+  window.location.replace(window.location.origin + "/Login")
 }
 
 export function login() {
