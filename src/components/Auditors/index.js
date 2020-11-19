@@ -28,8 +28,6 @@ export default function Auditors() {
         .then(auditorsFromContract => {
           let isAuditor = false;
           auditorsFromContract.forEach(auditor => {
-            console.log(auditorsFromContract);
-            console.log(window.accountId);
             if (auditor.account_id === window.accountId) {
               isAuditor = true;
               setDisableRegisterAuditor(true);
