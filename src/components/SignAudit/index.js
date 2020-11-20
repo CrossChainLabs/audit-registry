@@ -69,8 +69,8 @@ export default function SignAudit(codehash, url) {
         .then(certificatesFromContract => {
           let added = false;
           certificatesFromContract.forEach(certificateFromContract => {
-            if ((certificateFromContract.code_hash === codehash) &&
-               (certificateFromContract.audit_hash === audit_hash))
+            if ((certificateFromContract.store.code_hash === codehash) &&
+               (certificateFromContract.store.audit_hash === audit_hash))
             {
               added = true;
             }

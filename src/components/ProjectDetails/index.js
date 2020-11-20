@@ -110,7 +110,7 @@ export default function ProjectDetails(base64Url) {
             var projectsSlice = projectsFromContract;
             while (projectsSlice.length) {
               await Promise.all(projectsSlice.splice(0, 1).map(async (project) => {
-                if (project.url === url) {
+                if (project.store.url === url) {
                   let certificatesFromContract = await window.contract.get_project_certificates({ code_hash: project.code_hash });
                   proccesedProjects.push({ ...project, certificates: certificatesFromContract });
                 }
@@ -142,17 +142,17 @@ export default function ProjectDetails(base64Url) {
       <div>
         <a href={url}>
           <h2 className="font-weight-bold text-black">
-            {project?.name}
+            {project?.store?.name}
           </h2>
         </a>
         <div />
         <small className="d-flex align-items-center">
-          <a href={project.url + '/tree/' + project.code_hash}>
+          <a href={project.store.url + '/tree/' + project.code_hash}>
             <FontAwesomeIcon icon={faGithub} /> {project.code_hash}
           </a>
         </small>
         <small className="d-flex align-items-center">
-          <IconButton className={classes.iconButton} aria-label="view" onClick={() => { handleClickOpen('Description', project.metadata) }}>
+          <IconButton className={classes.iconButton} aria-label="view" onClick={() => { handleClickOpen('Description', project.store.metadata) }}>
             <MoreHorizIcon />
           </IconButton>
         </small>
@@ -166,7 +166,7 @@ export default function ProjectDetails(base64Url) {
           startIcon={<AddCircleRoundedIcon />}
           component={Link}
           disabled={window.isAuditor === false}
-          to={'/PageSignAudit/' + project?.code_hash + '/' + encode(project?.url)}>
+          to={'/PageSignAudit/' + project?.code_hash + '/' + encode(project?.store?.url)}>
           Audit
       </Button>
         <Button
@@ -177,13 +177,13 @@ export default function ProjectDetails(base64Url) {
           startIcon={<AddCircleRoundedIcon />}
           component={Link}
           disabled={window.isAuditor === false}
-          to={'/PageReportAdvisory/' + project?.code_hash + '/' + encode(project?.url)}>
+          to={'/PageReportAdvisory/' + project?.code_hash + '/' + encode(project?.store?.url)}>
           Advisory
       </Button>
         <div className="d-flex justify-content-between">
           <div></div>
           <small className="d-flex">
-            {(project?.status) ?
+            {(project?.store?.status) ?
               <div className="badge badge-success">Completed</div> :
               <div className="badge badge-warning">Pending</div>
             }
@@ -215,21 +215,21 @@ export default function ProjectDetails(base64Url) {
           </td>
           <td>
             <div className="d-flex align-items-center">
-              <div>{certificate.standards}</div>
+              <div>{certificate.store.standards}</div>
             </div>
           </td>
           <td className="text-center">
             <div className="d-flex align-items-center">
-              <div>{certificate.signature}</div>
+              <div>{certificate.store.signature}</div>
             </div>
           </td>
           <td className="text-center">
-            <IconButton  aria-label="view" onClick={() => {handleClickOpen('Audit', certificate.audit_hash)}}>
+            <IconButton  aria-label="view" onClick={() => {handleClickOpen('Audit', certificate.store.audit_hash)}}>
               <MoreVertIcon />
             </IconButton>
           </td>
           <td className="text-center">
-            <IconButton aria-label="view" disabled={certificate.advisory_hash.length === 0} onClick={() => {handleClickOpen('Advisory', certificate.advisory_hash)}}>
+            <IconButton aria-label="view" disabled={certificate.store.advisory_hash.length === 0} onClick={() => {handleClickOpen('Advisory', certificate.store.advisory_hash)}}>
               <MoreVertIcon />
             </IconButton>
           </td>

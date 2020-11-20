@@ -29,26 +29,26 @@ export default function Projects() {
         .then(projectsFromContract => {
           //sort
           projectsFromContract.sort((a,b) => {
-            return b.index - a.index;
+            return b.store.index - a.store.index;
           })
           //extract old versions
           let proccesedProjects = [];
           projectsFromContract.forEach(project => {
             let found = proccesedProjects.find(((element, index, arr) => {
-              if (element.url === project.url) {
+              if (element.url === project.store.url) {
                 arr[index].versions++;
               }
-              return element.url === project.url;
+              return element.url === project.store.url;
             }));
 
             if (!found) {
               proccesedProjects.push({
                 code_hash: project.code_hash,
-                name: project.name,
-                url: project.url,
-                metadata: project.metadata,
-                status: project.status,
-                index: project.index,
+                name: project.store.name,
+                url: project.store.url,
+                metadata: project.store.metadata,
+                status: project.store.status,
+                index: project.store.index, 
                 versions: 1
               });
             }
