@@ -1,14 +1,6 @@
 /*
- * This is an example of a Rust smart contract with two simple, symmetric functions:
- *
- * 1. set_greeting: accepts a greeting, such as "howdy", and records it for the user (account_id)
- *    who sent the request
- * 2. get_greeting: accepts an account_id and returns the greeting saved for it, defaulting to
- *    "Hello"
- *
- * Learn more about writing NEAR smart contracts with Rust:
- * https://github.com/near/near-sdk-rs
- *
+ * Audit Registry is designed to increase transparency and security in
+ * the blockchain and general software space.
  */
 
 use near_sdk::{env, near_bindgen, wee_alloc, AccountId};
@@ -25,14 +17,14 @@ pub type Signature = String;
 
 #[derive(BorshDeserialize, BorshSerialize, Default, Serialize)]
 pub struct AuditorStore {
-    metadata: Hash, // auditor's metadata
-    certificates:  HashMap<Hash, CertificateStore>, //code_hash is the primary key
+    metadata: Hash,
+    certificates: HashMap<Hash, CertificateStore>,
 }
 
 #[derive(BorshDeserialize, BorshSerialize, Default, Serialize)]
 pub struct Auditor {
     account_id: String,
-    metadata: Hash, // auditor's metadata
+    metadata: Hash,
 }
 
 #[derive(BorshDeserialize, BorshSerialize, Default, Serialize)]
@@ -47,11 +39,7 @@ pub struct CertificateStore {
 #[derive(BorshDeserialize, BorshSerialize, Default, Serialize)]
 pub struct Certificate {
     auditor: String,
-    code_hash: Hash,
-    signature: Signature,
-    standards: Vec<String>,
-    advisory_hash: Hash,
-    audit_hash: Hash
+    store: CertificateStore
 }
 
 
@@ -59,7 +47,7 @@ pub struct Certificate {
 pub struct ProjectStore {
     name: String,
     url: String,
-    metadata: Hash, // project's metadata
+    metadata: Hash,
     status: bool,
     index: u64
 }
@@ -67,11 +55,7 @@ pub struct ProjectStore {
 #[derive(BorshDeserialize, BorshSerialize, Default, Serialize)]
 pub struct Project {
     code_hash: Hash,
-    name: String,
-    url: String,
-    metadata: Hash, // project's metadata
-    status: bool,
-    index: u64
+    store: ProjectStore
 }
 
 #[near_bindgen]
@@ -102,7 +86,7 @@ impl AuditRegistry {
             return;
         }
 
-        //check if code_hash already exists
+        // check if code_hash already exists
         if self.auditors.contains_key(&account_id) {
             env::log(format!("Register_auditor already signed").as_bytes());
             return;
@@ -120,7 +104,7 @@ impl AuditRegistry {
     /// All the other information is used for visualization.
     /// Github url can be used to distinguish projects with the same name in UI. 
     pub fn register_project(&mut self, name: String, url: String, metadata: Hash, code_hash: Hash)  {
-        //check if code_hash already exists
+        // check if code_hash already exists
         if self.projects.contains_key(&code_hash) {
             return;
         }
@@ -144,7 +128,7 @@ impl AuditRegistry {
         let current_account_id = env::predecessor_account_id();
         env::log(format!("sign_audit code_hash: {}", code_hash).as_bytes());
 
-        //find auditor
+        // find auditor
         match self.auditors.get_mut(&current_account_id) {
             Some(auditor) => {
                 if auditor.certificates.contains_key(&code_hash) {
@@ -235,11 +219,7 @@ impl AuditRegistry {
         for (key, project) in self.projects {
             projects.push(Project {
                 code_hash: key,
-                name: project.name,
-                url: project.url,
-                metadata: project.metadata,
-                status: project.status,
-                index: project.index
+                store: project
             });
         }
         return projects;
@@ -251,84 +231,19 @@ impl AuditRegistry {
 
         for (key, auditor) in self.auditors {
             if let Some(certificate) = auditor.certificates.get(&code_hash) {
-
                 certificates.push(Certificate {
                     auditor: key,
-                    code_hash: code_hash.clone(),
-                    signature: certificate.signature.clone(),
-                    standards: certificate.standards.clone(),
-                    advisory_hash: certificate.advisory_hash.clone(),
-                    audit_hash: certificate.audit_hash.clone()
+                    store: CertificateStore{ 
+                        code_hash: certificate.code_hash.clone(), 
+                        signature: certificate.signature.clone(), 
+                        standards: certificate.standards.clone(), 
+                        advisory_hash: certificate.advisory_hash.clone(), 
+                        audit_hash: certificate.audit_hash.clone()
+                    }
                 });
             }
         }
         return certificates;
     }
-  }
-  
-
-/*
- * The rest of this file holds the inline tests for the code above
- * Learn more about Rust tests: https://doc.rust-lang.org/book/ch11-01-writing-tests.html
- *
- * To run from contract directory:
- * cargo test -- --nocapture
- *
- * From project root, to run in combination with frontend tests:
- * yarn test
- *
- */
-#[cfg(not(target_arch = "wasm32"))]
-#[cfg(test)]
-mod tests {
-    //use super::*;
-    use near_sdk::MockedBlockchain;
-    use near_sdk::{testing_env, VMContext};
-
-    // mock the context for testing, notice "signer_account_id" that was accessed above from env::
-    fn get_context(input: Vec<u8>, is_view: bool) -> VMContext {
-        VMContext {
-            current_account_id: "alice_near".to_string(),
-            signer_account_id: "bob_near".to_string(),
-            signer_account_pk: vec![0, 1, 2],
-            predecessor_account_id: "carol_near".to_string(),
-            input,
-            block_index: 0,
-            block_timestamp: 0,
-            account_balance: 0,
-            account_locked_balance: 0,
-            storage_usage: 0,
-            attached_deposit: 0,
-            prepaid_gas: 10u64.pow(18),
-            random_seed: vec![0, 1, 2],
-            is_view,
-            output_data_receivers: vec![],
-            epoch_height: 19,
-        }
-    }
-/*
-    #[test]
-    fn set_then_get_greeting() {
-        let context = get_context(vec![], false);
-        testing_env!(context);
-        let mut contract = Welcome::default();
-        contract.set_greeting("howdy".to_string());
-        assert_eq!(
-            "howdy".to_string(),
-            contract.get_greeting("bob_near".to_string())
-        );
-    }
-
-    #[test]
-    fn get_default_greeting() {
-        let context = get_context(vec![], true);
-        testing_env!(context);
-        let contract = Welcome::default();
-        // this test did not call set_greeting so should return the default "Hello" greeting
-        assert_eq!(
-            "Hello".to_string(),
-            contract.get_greeting("francis.near".to_string())
-        );
-    }
-    */
 }
+
