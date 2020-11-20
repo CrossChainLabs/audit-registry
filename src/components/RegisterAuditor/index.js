@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { Redirect } from "react-router-dom";
 import { useCookies } from 'react-cookie';
 import { Grid, Button, TextField, Paper} from '@material-ui/core';
@@ -17,8 +17,9 @@ const useStyles = makeStyles((theme) => ({
 export default function RegisterAuditor() {
   const accountId =  window.accountId;
   const classes = useStyles();
-  const [open, setOpen] = React.useState(false);
-  const [redirect, setRedirect] = React.useState(false);
+  const [open, setOpen] = useState(false);
+  const [auditorMetadataInput, setAuditorMetadataInput] = useState(false);
+  const [redirect, setRedirect] = useState(false);
   const [cookies, setCookie] = useCookies([
     'auditorMetadata'
   ]);
@@ -34,6 +35,11 @@ export default function RegisterAuditor() {
   
   const onRegisterAuditor = async () => {
     if (window.walletConnection.isSignedIn()) {
+      if (!cookies.auditorMetadata) {
+        setAuditorMetadataInput(true);
+        return;
+      }
+
       setOpen(true);
       let metadata_hash = await IPFS.getInstance().Save(cookies.auditorMetadata);
 
@@ -103,21 +109,26 @@ export default function RegisterAuditor() {
                         disabled
                       />
                     </div>
-                    <div className="mb-3">
-                      <label className="font-weight-bold mb-2">
-                        Description
+                  <div className="mb-3">
+                    <label className="font-weight-bold mb-2">
+                      Description
                       </label>
-                      <TextField
-                        variant="outlined"
-                        size="small"
-                        fullWidth
-                        multiline
-                        rows={10}
-                        placeholder="metadata"
-                        value={cookies.auditorMetadata}
-                        onChange={(event) => setCookie('auditorMetadata', event.target.value, { path: '/' })}
-                      />
-                    </div>
+                    <TextField
+                      error={auditorMetadataInput}
+                      required
+                      variant="outlined"
+                      size="small"
+                      fullWidth
+                      multiline
+                      rows={10}
+                      placeholder="metadata"
+                      value={cookies.auditorMetadata}
+                      onChange={(event) => {
+                        setCookie('auditorMetadata', event.target.value, { path: '/' });
+                        setAuditorMetadataInput(false);
+                      }}
+                    />
+                  </div>
 
                     <div className="text-center mb-4">
                       <Button 
