@@ -19,6 +19,7 @@ export default function ReportAdvisory(codehash, url) {
   const classes = useStyles();
   const [redirect, setRedirect] = useState(false);
   const [open, setOpen] = useState(false);
+  const [advisoryDataInput, setAdvisoryDataInput] = useState(false);
   const [cookies, setCookie] = useCookies([
     'advisoryData'
   ]);
@@ -34,6 +35,10 @@ export default function ReportAdvisory(codehash, url) {
   
   const onAdvisoryReport = async () => {
     if (window.walletConnection.isSignedIn()) {
+      if (!cookies.advisoryData) {
+        setAdvisoryDataInput(true);
+        return;
+      }
       setOpen(true);
       let advisory_hash = await IPFS.getInstance().Save(cookies.advisoryData);
 
@@ -104,21 +109,26 @@ export default function ReportAdvisory(codehash, url) {
                         disabled
                       />
                     </div>
-                    <div className="mb-3">
-                      <label className="font-weight-bold mb-2">
-                        Advisory
+                  <div className="mb-3">
+                    <label className="font-weight-bold mb-2">
+                      Advisory
                       </label>
-                      <TextField
-                        variant="outlined"
-                        size="small"
-                        fullWidth
-                        multiline
-                        rows={10}
-                        placeholder="advisory report"
-                        value={cookies.advisoryData}
-                        onChange={(event) => setCookie('advisoryData', event.target.value, { path: '/' })}
-                      />
-                    </div>
+                    <TextField
+                      error={advisoryDataInput}
+                      required
+                      variant="outlined"
+                      size="small"
+                      fullWidth
+                      multiline
+                      rows={10}
+                      placeholder="advisory report"
+                      value={cookies.advisoryData}
+                      onChange={(event) => {
+                        setCookie('advisoryData', event.target.value, { path: '/' }); 
+                        setAdvisoryDataInput(false);
+                      }}
+                    />
+                  </div>
 
                     <div className="text-center mb-4">
                       <Button 

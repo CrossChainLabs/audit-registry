@@ -19,6 +19,9 @@ export default function SignAudit(codehash, url) {
   const classes = useStyles();
   const [redirect, setRedirect] = useState(false);
   const [open, setOpen] = useState(false);
+  const [standardsInput, setStandardsInput] = useState(false);
+  const [signatureInput, setSignatureInput] = useState(false);
+  const [auditDataInput, setAuditDataInput] = useState(false);
   const [cookies, setCookie] = useCookies([
     'auditData',
     'standards',
@@ -37,6 +40,16 @@ export default function SignAudit(codehash, url) {
 
   const onSign = async () => {
     if (window.walletConnection.isSignedIn()) {
+      setAuditDataInput(!cookies.auditData);
+      setStandardsInput(!cookies.standards);
+      setSignatureInput(!cookies.signature);
+
+      if ((!cookies.auditData) ||
+        (!cookies.standards) ||
+        (!cookies.signature)) {
+        return;
+      }
+
       setOpen(true);
       let audit_hash = await IPFS.getInstance().Save(cookies.auditData);
 
@@ -56,9 +69,6 @@ export default function SignAudit(codehash, url) {
         .then(certificatesFromContract => {
           let added = false;
           certificatesFromContract.forEach(certificateFromContract => {
-            console.log(certificateFromContract)
-            console.log(codehash);
-            console.log(cookies.audit_hash);
             if ((certificateFromContract.code_hash === codehash) &&
                (certificateFromContract.audit_hash === audit_hash))
             {
@@ -103,6 +113,7 @@ export default function SignAudit(codehash, url) {
                       Sign Audit
                               </h1>
                   </span>
+                  <form noValidate autoComplete="off">
                   <div>
                     <div className="mb-3">
                       <label className="font-weight-bold mb-2">
@@ -122,12 +133,17 @@ export default function SignAudit(codehash, url) {
                         Standards
                                 </label>
                       <TextField
+                        error={standardsInput}
+                        required
                         variant="outlined"
                         size="small"
                         fullWidth
                         placeholder="ex: standard1;standard2;standard3"
                         value={cookies.standards}
-                        onChange={(event) => setCookie('standards', event.target.value, { path: '/' })}
+                        onChange={(event) => {
+                          setCookie('standards', event.target.value, { path: '/' }); 
+                          setStandardsInput(false);
+                        }}
                       />
                     </div>
                     <div className="mb-3">
@@ -135,29 +151,39 @@ export default function SignAudit(codehash, url) {
                         Signature
                      </label>
                       <TextField
+                        error={signatureInput}
+                        required
                         variant="outlined"
                         size="small"
                         fullWidth
                         placeholder="signature"
                         value={cookies.signature}
-                        onChange={(event) => setCookie('signature', event.target.value, { path: '/' })}
+                        onChange={(event) => {
+                          setCookie('signature', event.target.value, { path: '/' }); 
+                          setSignatureInput(false);
+                        }}
                       />
                     </div>
-                    <div className="mb-3">
-                      <label className="font-weight-bold mb-2">
-                        Audit
-                                </label>
-                      <TextField
-                        variant="outlined"
-                        size="small"
-                        fullWidth
-                        multiline
-                        rows={10}
-                        placeholder="audit findings"
-                        value={cookies.auditData}
-                        onChange={(event) => setCookie('auditData', event.target.value, { path: '/' })}
-                      />
-                    </div>
+                  <div className="mb-3">
+                    <label className="font-weight-bold mb-2">
+                      Audit
+                      </label>
+                    <TextField
+                      error={auditDataInput}
+                      required
+                      variant="outlined"
+                      size="small"
+                      fullWidth
+                      multiline
+                      rows={10}
+                      placeholder="audit findings"
+                      value={cookies.auditData}
+                      onChange={(event) => {
+                        setCookie('auditData', event.target.value, { path: '/' }); 
+                        setAuditDataInput(false);
+                      }}
+                    />
+                  </div>
                     <div className="text-center mb-4">
                       <Button 
                         variant="contained"
@@ -172,6 +198,7 @@ export default function SignAudit(codehash, url) {
                       </Backdrop>
                     </div>
                   </div>
+                  </form>
                 </div>
               </div>
             </Grid>

@@ -86,8 +86,6 @@ export default function ProjectDetails(base64Url) {
   const [message, setMessage] = React.useState('');
   const [severity, setSeverity] = React.useState('info');
 
-  console.log(url);
-
   const handleClickOpen = async (title, hash) => {
     if (!hash) return;
 
@@ -124,7 +122,6 @@ export default function ProjectDetails(base64Url) {
             });
 
             setProjects(proccesedProjects);
-            console.log(window.pageProjectDetails)
 
             if (window.pageProjectDetails) {
               setSeverity(window.pageProjectDetails?.alert?.severity);

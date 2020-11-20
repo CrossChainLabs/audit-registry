@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import { Redirect } from "react-router-dom";
 import { useCookies } from 'react-cookie';
 import { Grid, Button, TextField, Paper } from '@material-ui/core';
@@ -23,8 +23,12 @@ const useStyles = makeStyles((theme) => ({
 
 export default function RegisterProject() {
   const classes = useStyles();
-  const [redirect, setRedirect] = React.useState(false);
-  const [open, setOpen] = React.useState(false);
+  const [redirect, setRedirect] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [projectNameInput, setProjectNameInput] = useState(false);
+  const [projectUrlInput, setProjectUrlInput] = useState(false);
+  const [projectMetadataInput, setProjectMetadataInput] = useState(false);
+  const [projectCodeHashInput, setProjectCodeHashInput] = useState(false);
   const [cookies, setCookie] = useCookies(['projectName',
     'projectUrl',
     'projectMetadata',
@@ -41,6 +45,18 @@ export default function RegisterProject() {
 
   const onSubmit = async () => {
     if (window.walletConnection.isSignedIn()) {
+      setProjectNameInput(!cookies.projectName)
+      setProjectUrlInput(!cookies.projectUrl);
+      setProjectMetadataInput(!cookies.projectMetadata);
+      setProjectCodeHashInput(!cookies.projectCodeHash);
+
+      if ((!cookies.projectName) ||
+        (!cookies.projectUrl) ||
+        (!cookies.projectMetadata) ||
+        (!cookies.projectCodeHash)) {
+        return;
+      }
+
       setOpen(true);
       let metadata_hash = await IPFS.getInstance().Save(cookies.projectMetadata);
 
@@ -103,60 +119,80 @@ export default function RegisterProject() {
                     </h1>
                   </span>
                   <div>
-                    <div className="mb-3">
-                      <label className="font-weight-bold mb-2">
-                        Name
+                  <div className="mb-3">
+                    <label className="font-weight-bold mb-2">
+                      Name
                       </label>
-                      <TextField
-                        variant="outlined"
-                        size="small"
-                        fullWidth
-                        placeholder="project name"
-                        value={cookies.projectName}
-                        onChange={(event) => setCookie('projectName', event.target.value, { path: '/' })}
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <label className="font-weight-bold mb-2">
-                        URL
+                    <TextField
+                      error={projectNameInput}
+                      required
+                      variant="outlined"
+                      size="small"
+                      fullWidth
+                      placeholder="project name"
+                      value={cookies.projectName}
+                      onChange={(event) => {
+                        setCookie('projectName', event.target.value, { path: '/' }); 
+                        setProjectNameInput(false);
+                      }}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="font-weight-bold mb-2">
+                      URL
                       </label>
-                      <TextField
-                        variant="outlined"
-                        size="small"
-                        fullWidth
-                        placeholder="project url"
-                        value={cookies.projectUrl}
-                        onChange={(event) => setCookie('projectUrl', event.target.value, { path: '/' })}
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <label className="font-weight-bold mb-2">
-                        Code Hash
+                    <TextField
+                      error={projectUrlInput}
+                      required
+                      variant="outlined"
+                      size="small"
+                      fullWidth
+                      placeholder="project url"
+                      value={cookies.projectUrl}
+                      onChange={(event) => { 
+                        setCookie('projectUrl', event.target.value, { path: '/' }); 
+                        setProjectUrlInput(false); 
+                      }}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="font-weight-bold mb-2">
+                      Code Hash
                       </label>
-                      <TextField
-                        variant="outlined"
-                        size="small"
-                        fullWidth
-                        placeholder="code hash"
-                        value={cookies.projectCodeHash}
-                        onChange={(event) => setCookie('projectCodeHash', event.target.value, { path: '/' })}
-                      />
-                    </div>
-                    <div className="mb-3">
-                      <label className="font-weight-bold mb-2">
-                        Description
+                    <TextField
+                      error={projectCodeHashInput}
+                      required
+                      variant="outlined"
+                      size="small"
+                      fullWidth
+                      placeholder="code hash"
+                      value={cookies.projectCodeHash}
+                      onChange={(event) => {
+                        setCookie('projectCodeHash', event.target.value, { path: '/' });
+                        setProjectCodeHashInput(false);
+                      }}
+                    />
+                  </div>
+                  <div className="mb-3">
+                    <label className="font-weight-bold mb-2">
+                      Description
                       </label>
-                      <TextField
-                        variant="outlined"
-                        size="small"
-                        fullWidth
-                        multiline
-                        rows={10}
-                        placeholder="project metadata"
-                        value={cookies.projectMetadata}
-                        onChange={(event) => setCookie('projectMetadata', event.target.value, { path: '/' })}
-                      />
-                    </div>
+                    <TextField
+                      error={projectMetadataInput}
+                      required
+                      variant="outlined"
+                      size="small"
+                      fullWidth
+                      multiline
+                      rows={10}
+                      placeholder="project metadata"
+                      value={cookies.projectMetadata}
+                      onChange={(event) => {
+                        setCookie('projectMetadata', event.target.value, { path: '/' });
+                        setProjectMetadataInput(false);
+                      }}
+                    />
+                  </div>
                     <div className="text-center mb-4">
                       <Button 
                         variant="contained"
