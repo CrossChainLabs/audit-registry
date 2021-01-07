@@ -49,7 +49,6 @@ export default function RegisterAuditor() {
       }
 
       window.contract.register_auditor({
-        account_id: accountId,
         metadata: metadata_hash
       }).then(result => {
         window.contract.get_auditors_list()

@@ -16,32 +16,20 @@ pub type Signature = String;
 
 
 #[derive(BorshDeserialize, BorshSerialize, Default, Serialize)]
-pub struct AuditorStore {
-    metadata: Hash,
-    certificates: HashMap<Hash, CertificateStore>,
-}
-
-#[derive(BorshDeserialize, BorshSerialize, Default, Serialize)]
 pub struct Auditor {
     account_id: String,
     metadata: Hash,
 }
 
 #[derive(BorshDeserialize, BorshSerialize, Default, Serialize)]
-pub struct CertificateStore {
+pub struct Certificate {
     code_hash: Hash,
+    auditor: String,
     signature: Signature,
     standards: Vec<String>,
     advisory_hash: Hash,
     audit_hash: Hash
 }
-
-#[derive(BorshDeserialize, BorshSerialize, Default, Serialize)]
-pub struct Certificate {
-    auditor: String,
-    store: CertificateStore
-}
-
 
 #[derive(BorshDeserialize, BorshSerialize, Default, Serialize)]
 pub struct ProjectStore {
@@ -61,30 +49,27 @@ pub struct Project {
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize, Default, Serialize)]
 pub struct AuditRegistry {
-    auditors: HashMap<AccountId, AuditorStore>,
+    auditors: HashMap<AccountId, Hash>,
     projects: HashMap<Hash, ProjectStore>,
+    certificates: HashMap<Hash, Certificate>, //certificate_hash = hash(code_hash + auditor)
     project_index: u64
 }
 
-#[near_bindgen]
 impl AuditRegistry {
     pub fn new() -> Self {
         Self {
             auditors: HashMap::new(),
             projects: HashMap::new(),
+            certificates: HashMap::new(),
             project_index: 0
         }
     }
 
     /// Register as auditor, linking account_id and metadata that is IPFS/Sia content hash.
-    pub fn register_auditor(&mut self, account_id: AccountId, metadata: Hash) {
-        // check that the logged in account_id is the same with the provided one
-        let current_account_id = env::predecessor_account_id();
-        env::log(format!("Register_auditor: {}", current_account_id).as_bytes());
-        if account_id.ne(&current_account_id) {
-            env::log(format!("Current register auditor not equal to: {}", account_id).as_bytes());
-            return;
-        }
+    pub fn register_auditor(&mut self, metadata: Hash) {
+        // get account_id
+        let account_id = env::predecessor_account_id();
+        env::log(format!("register_auditor(): auditor's name is {}", account_id).as_bytes());
 
         // check if code_hash already exists
         if self.auditors.contains_key(&account_id) {
@@ -93,10 +78,7 @@ impl AuditRegistry {
         }
 
         // insert auditor to auditors map
-        self.auditors.insert(account_id, AuditorStore {
-            metadata,
-            certificates: HashMap::new()
-        });
+        self.auditors.insert(account_id, metadata);
         env::log(format!("Register_auditor completed").as_bytes());
     }
   
@@ -125,42 +107,44 @@ impl AuditRegistry {
     /// List of standards represent which standards given source code satisfies. It's free form but should be social consensus for specific domains. E.g. in blockchains these will be EIP-* or NEP-*.
     pub fn sign_audit(&mut self, code_hash: Hash, audit_hash: Hash, standards: Vec<String>, signature: Signature) {
         // get current account_id
-        let current_account_id = env::predecessor_account_id();
+        let account_id = env::predecessor_account_id();
         env::log(format!("sign_audit code_hash: {}", code_hash).as_bytes());
 
-        // find auditor
-        match self.auditors.get_mut(&current_account_id) {
-            Some(auditor) => {
-                if auditor.certificates.contains_key(&code_hash) {
-                    env::log(format!("sign_audit auditor already signed").as_bytes());
-                    return;
+        // calculate certificate_hash hash
+        let certificate_hasher = env::sha256((code_hash.clone() + &account_id).as_bytes());
+        let certificate_hash = std::str::from_utf8(&certificate_hasher).unwrap();
+
+        // check if certificates contains the certificate_hash
+        if self.certificates.contains_key(certificate_hash) {
+            env::log(format!("sign_audit auditor already signed").as_bytes());
+            return;
+        }
+
+        env::log(format!("sign_audit auditor: {}", account_id).as_bytes());
+        match self.projects.get_mut(&code_hash) {
+            Some(project) => {
+                env::log(format!("sign_audit project.status: {}", project.status).as_bytes());
+                project.status = true; //true = completed
+                project.index = self.project_index;
+
+                if self.project_index < u64::MAX {
+                    self.project_index += 1;
                 }
-
-                env::log(format!("sign_audit auditor: {}", current_account_id).as_bytes());
-                match self.projects.get_mut(&code_hash) {
-                    Some(project) => {
-                        env::log(format!("sign_audit project.status: {}", project.status).as_bytes());
-                        project.status = true; //true = completed
-                        project.index = self.project_index;
-
-                        if self.project_index < u64::MAX {
-                            self.project_index += 1;
-                        }
-                    },
-                    None => {}
-                }
-
-                let advisory_hash = "".to_string();
-                auditor.certificates.insert(code_hash.clone(), CertificateStore { 
-                    code_hash, 
-                    signature, 
-                    standards, 
-                    advisory_hash, 
-                    audit_hash });
-                env::log(format!("sign_audit completed").as_bytes());
             },
             None => {}
         }
+
+        let advisory_hash = "".to_string();
+        let auditor = account_id;
+        self.certificates.insert(certificate_hash.to_string(), Certificate { 
+            code_hash,
+            auditor,
+            signature, 
+            standards, 
+            advisory_hash, 
+            audit_hash });
+        env::log(format!("sign_audit completed").as_bytes());
+            
     }
   
     /// Report advisory for given code hash. Advisory hash is IPFS/Sia content hash.
@@ -168,46 +152,44 @@ impl AuditRegistry {
     /// It's possible to report advisory first, without posting details to inform users about possible issue and later reveal the details in the disclosure.
     pub fn report_advisory(&mut self, code_hash: Hash, advisory_hash: Hash) {
          // get current account_id
-         let current_account_id = env::predecessor_account_id();
+         let account_id = env::predecessor_account_id();
 
-         //find auditor
-         match self.auditors.get_mut(&current_account_id) {
-            Some(auditor_store) => {
-                if !auditor_store.certificates.contains_key(&code_hash) {
-                    return;
-                }
+        // calculate certificate_hash hash
+        let certificate_hasher = env::sha256((code_hash.clone() + &account_id).as_bytes());
+        let certificate_hash = std::str::from_utf8(&certificate_hasher).unwrap();
 
-                // add advisory_hash to certificate
-                match auditor_store.certificates.get_mut(&code_hash) {
-                Some(certificate_store) => {   
-                    env::log(format!("advisory_hash: {}", advisory_hash).as_bytes());
-                    certificate_store.advisory_hash = advisory_hash;
-                    env::log(format!("certificate_store.advisory_hash: {}", certificate_store.advisory_hash).as_bytes());
+        if !self.certificates.contains_key(certificate_hash) {
+            return;
+        }
 
-                    match self.projects.get_mut(&code_hash) {
-                        Some(project) => {
-                            project.index = self.project_index;
-    
-                            if self.project_index < u64::MAX {
-                                self.project_index += 1;
-                            }
-                        },
-                        None => {}
+        // add advisory_hash to certificate
+        match self.certificates.get_mut(certificate_hash) {
+        Some(certificate_store) => {   
+            env::log(format!("advisory_hash: {}", advisory_hash).as_bytes());
+            certificate_store.advisory_hash = advisory_hash;
+            env::log(format!("certificate_store.advisory_hash: {}", certificate_store.advisory_hash).as_bytes());
+
+            match self.projects.get_mut(&code_hash) {
+                Some(project) => {
+                    project.index = self.project_index;
+
+                    if self.project_index < u64::MAX {
+                        self.project_index += 1;
                     }
                 },
                 None => {}
-                }
-             },
-            None => {}
-         }
+            }
+        },
+        None => {}
+        }
     }
   
     /// List all auditors.
     pub fn get_auditors_list(self) -> Vec<Auditor> {
         let mut auditors = Vec::new();
 
-        for (key, auditor) in self.auditors {
-            auditors.push(Auditor{account_id:key, metadata: auditor.metadata});
+        for (key, metadata) in self.auditors {
+            auditors.push(Auditor{account_id:key, metadata: metadata});
         }
         return auditors;
     }
@@ -222,6 +204,7 @@ impl AuditRegistry {
                 store: project
             });
         }
+
         return projects;
     }
    
@@ -229,18 +212,9 @@ impl AuditRegistry {
     pub fn get_project_certificates(self, code_hash: Hash) -> Vec<Certificate> {
         let mut certificates = Vec::new();
 
-        for (key, auditor) in self.auditors {
-            if let Some(certificate) = auditor.certificates.get(&code_hash) {
-                certificates.push(Certificate {
-                    auditor: key,
-                    store: CertificateStore{ 
-                        code_hash: certificate.code_hash.clone(), 
-                        signature: certificate.signature.clone(), 
-                        standards: certificate.standards.clone(), 
-                        advisory_hash: certificate.advisory_hash.clone(), 
-                        audit_hash: certificate.audit_hash.clone()
-                    }
-                });
+        for (_key, certificate) in self.certificates {
+            if certificate.code_hash == code_hash {
+                certificates.push(certificate);
             }
         }
         return certificates;
