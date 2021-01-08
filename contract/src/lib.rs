@@ -35,7 +35,8 @@ pub struct Certificate {
 
 #[derive(Default, Serialize, BorshDeserialize, BorshSerialize)]
 #[serde(crate = "near_sdk::serde")]
-pub struct ProjectStore {
+pub struct Project {
+    code_hash: Hash,
     name: String,
     url: String,
     metadata: Hash,
@@ -43,18 +44,11 @@ pub struct ProjectStore {
     index: u64
 }
 
-#[derive(Serialize)]
-#[serde(crate = "near_sdk::serde")]
-pub struct Project {
-    code_hash: Hash,
-    store: ProjectStore
-}
-
 #[near_bindgen]
 #[derive(Default, BorshDeserialize, BorshSerialize)]
 pub struct AuditRegistry {
     auditors: UnorderedMap<AccountId, Auditor>,
-    projects: UnorderedMap<Hash, ProjectStore>,
+    projects: UnorderedMap<Hash, Project>,
     certificates: UnorderedMap<Vec<u8>, Certificate>,
     project_index: u64
 }
@@ -102,7 +96,8 @@ impl AuditRegistry {
     pub fn register_project(&mut self, name: String, url: String, metadata: Hash, code_hash: Hash) -> bool  {
         let status = false;
         let index = self.project_index;
-        let project = ProjectStore {
+        let project = Project {
+            code_hash: code_hash.clone(),
             name,
             url,
             metadata,
@@ -198,7 +193,8 @@ impl AuditRegistry {
             let metadata = "".to_string();
             let status = false;
             let index = 0;
-            let empty_project = ProjectStore {
+            let empty_project = Project {
+                code_hash: code_hash.clone(),
                 name,
                 url,
                 metadata,
@@ -229,15 +225,17 @@ impl AuditRegistry {
     }
    
     /// List certificates for given project.
-    pub fn get_project_certificates(self, _code_hash: Hash) -> Vec<Certificate> {
-        let certificates = Vec::default();
+    pub fn get_project_certificates(self, code_hash: Hash) -> Vec<Certificate> {
+        let certificates = self.certificates.values_as_vector().to_vec();
+        let mut project_certificates: Vec<Certificate> = Vec::new();
 
-        /*for (_key, certificate) in self.certificates {
-            if certificate.code_hash == code_hash {
-                certificates.push(certificate);
+        for iter in certificates {
+            if iter.code_hash == code_hash {
+                project_certificates.push(iter);
             }
-        }*/
-        return certificates;
+        }
+
+        return project_certificates;
     }
 }
 
