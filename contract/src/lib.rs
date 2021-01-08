@@ -94,15 +94,13 @@ impl AuditRegistry {
     /// All the other information is used for visualization.
     /// Github url can be used to distinguish projects with the same name in UI. 
     pub fn register_project(&mut self, name: String, url: String, metadata: Hash, code_hash: Hash) -> bool  {
-        let status = false;
-        let index = self.project_index;
         let project = Project {
             code_hash: code_hash.clone(),
             name,
             url,
             metadata,
-            status,
-            index
+            status: false,
+            index: self.project_index
         };
 
         let result = self.projects.insert(&code_hash, &project);
@@ -129,21 +127,27 @@ impl AuditRegistry {
         let account_id = env::predecessor_account_id();
         env::log(format!("sign_audit code_hash: {}", code_hash).as_bytes());
 
-        // TODO: check if account_id is auditor
-        //let empty_auditor = "".to_string();
-        //let metadata = self.auditors.get(&account_id).unwrap_or(empty_auditor);
+        // check if account_id is in auditor's map
+        let empty_auditor = Auditor {
+            account_id: "".to_string(),
+            metadata: "".to_string()
+        };
+        let auditor = self.auditors.get(&account_id).unwrap_or(empty_auditor);
+        if auditor.account_id.is_empty() {
+            env::log(format!("sign_audit(): failed, account_id is not an auditor").as_bytes());
+            return false;
+        }
       
         // calculate certificate's hash
         let certificate_hash = env::sha256((code_hash.clone() + &account_id).as_bytes());
 
         // check if audit was already signed
-        let advisory_hash = "".to_string();
         let certificate = Certificate {
-            code_hash,
+            code_hash: code_hash.clone(),
             account_id,
             signature,
             standards,
-            advisory_hash,
+            advisory_hash: "".to_string(),
             audit_hash
         };
         let result = self.certificates.insert(&certificate_hash, &certificate);
@@ -152,7 +156,27 @@ impl AuditRegistry {
                 env::log(format!("sign_audit(): failed, audit was already signed").as_bytes());
                 return false;
             },
-            None => {}
+            None => {
+                // set project status and index 
+                let empty_project = Project {
+                    code_hash: "".to_string(),
+                    name: "".to_string(),
+                    url: "".to_string(),
+                    metadata: "".to_string(),
+                    status: false,
+                    index: 0
+                };
+                let mut project = self.projects.get(&code_hash).unwrap_or(empty_project);
+                if project.code_hash.is_empty() {
+                    env::log(format!("sign_audit(): failed, project.status could not be set to true").as_bytes());
+                    return false;
+                }
+                project.status = true;
+                project.index = self.project_index;
+                if self.project_index < u64::MAX {
+                    self.project_index += 1;
+                }
+            }
         }
 
         env::log(format!("sign_audit(): completed").as_bytes());
@@ -170,17 +194,13 @@ impl AuditRegistry {
         let certificate_hash = env::sha256((code_hash.clone() + &current_account_id).as_bytes());
 
         // add advisory_hash to certificate
-        let account_id = "".to_string();
-        let signature = "".to_string();
-        let standards: Vec<String> = Vec::default();
-        let audit_hash = "".to_string();
         let empty_certificate = Certificate {
-            code_hash: code_hash.clone(),
-            account_id,
-            signature,
-            standards,
-            advisory_hash: advisory_hash.clone(),
-            audit_hash
+            code_hash: "".to_string(),
+            account_id: "".to_string(),
+            signature: "".to_string(),
+            standards: Vec::default(),
+            advisory_hash: "".to_string(),
+            audit_hash: "".to_string()
         };
         let mut certificate = self.certificates.get(&certificate_hash).unwrap_or(empty_certificate);
         if !certificate.account_id.is_empty() {
@@ -188,18 +208,13 @@ impl AuditRegistry {
             env::log(format!("report_advisory(): certificate_store.advisory_hash is {}", certificate.advisory_hash).as_bytes());
 
             // set project index
-            let name = "".to_string();
-            let url = "".to_string();
-            let metadata = "".to_string();
-            let status = false;
-            let index = 0;
             let empty_project = Project {
-                code_hash: code_hash.clone(),
-                name,
-                url,
-                metadata,
-                status,
-                index
+                code_hash: "".to_string(),
+                name: "".to_string(),
+                url: "".to_string(),
+                metadata: "".to_string(),
+                status: false,
+                index: 0
             };
             let mut project = self.projects.get(&code_hash).unwrap_or(empty_project);
             if !project.name.is_empty() {
@@ -224,7 +239,7 @@ impl AuditRegistry {
         return projects;
     }
    
-    /// List certificates for given project.
+    /// List certificates for a given project.
     pub fn get_project_certificates(self, code_hash: Hash) -> Vec<Certificate> {
         let certificates = self.certificates.values_as_vector().to_vec();
         let mut project_certificates: Vec<Certificate> = Vec::new();
