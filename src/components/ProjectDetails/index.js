@@ -215,21 +215,21 @@ export default function ProjectDetails(base64Url) {
           </td>
           <td>
             <div className="d-flex align-items-center">
-              <div>{certificate.store.standards}</div>
+              <div>{certificate.standards}</div>
             </div>
           </td>
           <td className="text-center">
             <div className="d-flex align-items-center">
-              <div>{certificate.store.signature}</div>
+              <div>{certificate.signature}</div>
             </div>
           </td>
           <td className="text-center">
-            <IconButton  aria-label="view" onClick={() => {handleClickOpen('Audit', certificate.store.audit_hash)}}>
+            <IconButton  aria-label="view" onClick={() => {handleClickOpen('Audit', certificate.audit_hash)}}>
               <MoreVertIcon />
             </IconButton>
           </td>
           <td className="text-center">
-            <IconButton aria-label="view" disabled={certificate.store.advisory_hash.length === 0} onClick={() => {handleClickOpen('Advisory', certificate.store.advisory_hash)}}>
+            <IconButton aria-label="view" disabled={certificate.advisory_hash.length === 0} onClick={() => {handleClickOpen('Advisory', certificate.advisory_hash)}}>
               <MoreVertIcon />
             </IconButton>
           </td>
