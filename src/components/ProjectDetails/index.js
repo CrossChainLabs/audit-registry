@@ -110,7 +110,7 @@ export default function ProjectDetails(base64Url) {
             var projectsSlice = projectsFromContract;
             while (projectsSlice.length) {
               await Promise.all(projectsSlice.splice(0, 1).map(async (project) => {
-                if (project.store.url === url) {
+                if (project.url === url) {
                   let certificatesFromContract = await window.contract.get_project_certificates({ code_hash: project.code_hash });
                   proccesedProjects.push({ ...project, certificates: certificatesFromContract });
                 }
@@ -142,17 +142,17 @@ export default function ProjectDetails(base64Url) {
       <div>
         <a href={url}>
           <h2 className="font-weight-bold text-black">
-            {project?.store?.name}
+            {project?.name}
           </h2>
         </a>
         <div />
         <small className="d-flex align-items-center">
-          <a href={project.store.url + '/tree/' + project.code_hash}>
+          <a href={project.url + '/tree/' + project.code_hash}>
             <FontAwesomeIcon icon={faGithub} /> {project.code_hash}
           </a>
         </small>
         <small className="d-flex align-items-center">
-          <IconButton className={classes.iconButton} aria-label="view" onClick={() => { handleClickOpen('Description', project.store.metadata) }}>
+          <IconButton className={classes.iconButton} aria-label="view" onClick={() => { handleClickOpen('Description', project.metadata) }}>
             <MoreHorizIcon />
           </IconButton>
         </small>
@@ -166,7 +166,7 @@ export default function ProjectDetails(base64Url) {
           startIcon={<AddCircleRoundedIcon />}
           component={Link}
           disabled={window.isAuditor === false}
-          to={'/PageSignAudit/' + project?.code_hash + '/' + encode(project?.store?.url)}>
+          to={'/PageSignAudit/' + project?.code_hash + '/' + encode(project?.url)}>
           Audit
       </Button>
         <Button
@@ -177,13 +177,13 @@ export default function ProjectDetails(base64Url) {
           startIcon={<AddCircleRoundedIcon />}
           component={Link}
           disabled={window.isAuditor === false}
-          to={'/PageReportAdvisory/' + project?.code_hash + '/' + encode(project?.store?.url)}>
+          to={'/PageReportAdvisory/' + project?.code_hash + '/' + encode(project?.url)}>
           Advisory
       </Button>
         <div className="d-flex justify-content-between">
           <div></div>
           <small className="d-flex">
-            {(project?.store?.status) ?
+            {(project?.status) ?
               <div className="badge badge-success">Completed</div> :
               <div className="badge badge-warning">Pending</div>
             }
