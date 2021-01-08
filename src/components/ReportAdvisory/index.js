@@ -53,8 +53,8 @@ export default function ReportAdvisory(codehash, url) {
           .then(certificatesFromContract => {
             let added = false;
             certificatesFromContract.forEach(certificateFromContract => {
-              if ((certificateFromContract.store.code_hash === codehash) &&
-                 (certificateFromContract.store.advisory_hash === advisory_hash))
+              if ((certificateFromContract.code_hash === codehash) &&
+                 (certificateFromContract.advisory_hash === advisory_hash))
               {
                 added = true;
               }
