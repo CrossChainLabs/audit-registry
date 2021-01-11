@@ -176,6 +176,8 @@ impl AuditRegistry {
                 if self.project_index < u64::MAX {
                     self.project_index += 1;
                 }
+
+                self.projects.insert(&code_hash, &project);
             }
         }
 
@@ -207,6 +209,8 @@ impl AuditRegistry {
             certificate.advisory_hash = advisory_hash;
             env::log(format!("report_advisory(): certificate_store.advisory_hash is {}", certificate.advisory_hash).as_bytes());
 
+            self.certificates.insert(&certificate_hash, &certificate);
+
             // set project index
             let empty_project = Project {
                 code_hash: "".to_string(),
@@ -223,6 +227,8 @@ impl AuditRegistry {
                 if self.project_index < u64::MAX {
                     self.project_index += 1;
                 }
+
+                self.projects.insert(&code_hash, &project);
             }
         }
     }
